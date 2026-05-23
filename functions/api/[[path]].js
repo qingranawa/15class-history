@@ -28,22 +28,6 @@ export async function onRequest(context) {
   try {
     if (path === '/api/auth/login' && method === 'POST') {
       response = await handleLogin(request, env);
-    } else if (path === '/api/auth/login-debug' && method === 'POST') {
-      // 临时调试：详细追踪登录流程
-      const { parseBody, verifyPassword } = await import('../_lib/utils.js');
-      const body = await parseBody(request);
-      const user = await env.DB.prepare('SELECT id, username, password_hash, role FROM users WHERE username = ?').bind(body?.username).first();
-      let verifyResult = null;
-      if (user) verifyResult = await verifyPassword(body.password, user.password_hash);
-      response = jsonResponse({
-        bodyReceived: !!body,
-        username: body?.username,
-        passwordLen: body?.password?.length,
-        userFound: !!user,
-        userId: user?.id,
-        storedHashLen: user?.password_hash?.length,
-        verifyResult
-      });
     } else if (path === '/api/auth/register' && method === 'POST') {
       response = await handleRegister(request, env);
     } else if (path === '/api/auth/me' && method === 'GET') {
@@ -58,22 +42,6 @@ export async function onRequest(context) {
       response = await handleUsersRoute(request, env, path);
     } else if (path === '/api/health') {
       response = jsonResponse({ status: 'ok', timestamp: new Date().toISOString() });
-    } else if (path === '/api/debug/hash') {
-      // 调试端点：生成测试哈希
-      const { hashPassword, verifyPassword } = await import('../_lib/utils.js');
-      const h = await hashPassword('admin123456');
-      const v = await verifyPassword('admin123456', h);
-      response = jsonResponse({ hash: h, verify: v, algo: 'PBKDF2-SHA256-100000' });
-    } else if (path === '/api/debug/verify') {
-      // 调试端点：验证现有用户密码
-      const { verifyPassword } = await import('../_lib/utils.js');
-      const user = await env.DB.prepare('SELECT * FROM users WHERE id = 2').first();
-      const v = await verifyPassword('admin123456', user.password_hash);
-      response = jsonResponse({
-        userId: user.id,
-        verify: v,
-        hashPreview: user.password_hash.substring(0, 32) + '...'
-      });
     } else {
       response = errorResponse('API 路由不存在', 404);
     }

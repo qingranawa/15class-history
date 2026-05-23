@@ -12,10 +12,10 @@ export async function handleLogin(request, env) {
     'SELECT id, username, password_hash, role FROM users WHERE username = ?'
   ).bind(body.username).first();
 
-  if (!user) return jsonResponse({ debug: 'no_user', bodyUsername: body.username, bodyPasswordLen: body.password?.length }, 401);
+  if (!user) return errorResponse('用户名或密码错误', 401);
 
   const valid = await verifyPassword(body.password, user.password_hash);
-  if (!valid) return jsonResponse({ debug: 'bad_password', bodyPassword: body.password, bodyPasswordLen: body.password.length, hashPreview: user.password_hash.substring(0, 32) }, 401);
+  if (!valid) return errorResponse('用户名或密码错误', 401);
 
   const token = await signJWT(
     { userId: user.id, username: user.username, role: user.role },
