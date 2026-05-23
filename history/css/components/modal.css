@@ -152,6 +152,43 @@
     color: #ff8a8a;
     margin-top: 12px;
 }
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.auth-tab {
+    flex: 1;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.6);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.auth-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+.auth-tab:hover:not(.active) {
+    border-color: var(--accent-light);
+    color: #fff;
+}
+.register-hint {
+    color: #f59e0b;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    text-align: left;
+}
+#regBtn {
+    background: #22c55e;
+}
+#regBtn:hover {
+    background: #16a34a;
+}
 .welcome-message {
     text-align: center;
     margin: 16px auto 32px;

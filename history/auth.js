@@ -239,11 +239,55 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => authContent.classList.remove('shake'), 500);
   }
 
+  // 注册处理
+  async function registerUser() {
+    const regUser = document.getElementById('regUsername').value.trim();
+    const regPass = document.getElementById('regPassword').value.trim();
+    if (!regUser || !regPass) { errorDiv.textContent = '请填写用户名和密码'; return; }
+    if (/[一-鿿]/.test(regUser)) { errorDiv.textContent = '账户名不能包含中文，请使用英文或拼音'; return; }
+    errorDiv.textContent = '注册中...';
+    try {
+      await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ username: regUser, password: regPass }) });
+      errorDiv.textContent = '';
+      toastMsg('注册成功！请登录', 'success');
+      switchAuthTab('login');
+      document.getElementById('username').value = regUser;
+      document.getElementById('password').value = regPass;
+    } catch (err) {
+      errorDiv.textContent = err.message;
+    }
+  }
+
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('authLoginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('authRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
+    errorDiv.textContent = '';
+  }
+
+  function toastMsg(msg, type) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;animation:toastIn .3s ease;background:' + (type === 'success' ? '#22c55e' : '#ef4444');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
   authBtn.addEventListener('click', verifyAndEnter);
   passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); verifyAndEnter(); }
   });
   usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); verifyAndEnter(); }
+  });
+  document.getElementById('regBtn').addEventListener('click', registerUser);
+  document.getElementById('regPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); registerUser(); }
+  });
+  document.getElementById('regUsername').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('regPassword').focus();
+  });
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchAuthTab(tab.dataset.tab));
   });
 });

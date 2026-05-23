@@ -72,16 +72,26 @@
     <div id="authModal" class="auth-modal">
       <div class="auth-modal-content">
         <h2>📜 班史准入</h2>
-        <p>请输入您的姓名与密码，方可阅览2025级15班班级史记</p>
-        <div class="protected-tip">🔒 受保护内容，请输入密码</div>
-        <input
-          type="text"
-          id="username"
-          placeholder="姓名"
-          autocomplete="off"
-        />
-        <input type="password" id="password" placeholder="密码" />
-        <button id="authBtn">入史</button>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">🔑 登录</button>
+          <button class="auth-tab" data-tab="register">📝 注册</button>
+        </div>
+        <div id="authLoginForm">
+          <input
+            type="text"
+            id="username"
+            placeholder="姓名"
+            autocomplete="off"
+          />
+          <input type="password" id="password" placeholder="密码" />
+          <button id="authBtn">入史</button>
+        </div>
+        <div id="authRegisterForm" style="display:none">
+          <p class="register-hint">⚠️ 账户名不能包含中文，请使用英文或拼音</p>
+          <input type="text" id="regUsername" placeholder="用户名（英文/拼音）" autocomplete="off" />
+          <input type="password" id="regPassword" placeholder="密码" value="admin123456" />
+          <button id="regBtn">注册</button>
+        </div>
         <div id="authError" class="auth-error"></div>
       </div>
     </div>

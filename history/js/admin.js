@@ -346,8 +346,11 @@ async function deleteMaterial(id) {
 
 // ===================== 视图：史事稿件（DraftWriter） =====================
 async function renderDrafts(main) {
-  const statusFilter = isAtLeast('SupervisorGeneral') ? '' : '&status=draft&status=pending_review&status=rejected';
   main.innerHTML = `<h1>✍️ 史事稿件</h1><p class="subtitle">撰写和管理史事内容</p>
+    <div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">
+      📋 <strong>工作流</strong>：新建稿件 → 编辑内容 → <span style="color:#f59e0b">提交审核</span> → 审定委员审核 → <span style="color:#22c55e">通过发布</span> / <span style="color:#ef4444">驳回修改</span>
+      ${currentUser.role === 'DraftWriter' ? '<br>💡 提示：写完稿件后别忘了点 <span style=\"color:#f59e0b\">提交审核</span>，否则审定委员看不到！' : ''}
+    </div>
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateDraftModal()">✍️ 新建稿件</button>
       <select id="draftStatusFilter" onchange="renderDrafts(document.getElementById('mainContent'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)">
