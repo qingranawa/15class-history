@@ -420,7 +420,7 @@ function canEditDraft(r) {
 }
 
 function canSubmitReview(r) {
-  return currentUser.role === 'DraftWriter' && r.author_id === currentUser.id &&
+  return isAtLeast('DraftWriter') && r.author_id === currentUser.id &&
     (r.status === 'draft' || r.status === 'rejected');
 }
 
