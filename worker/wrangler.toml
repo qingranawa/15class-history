@@ -6,16 +6,8 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "15class-history-db"
-database_id = "YOUR_D1_DATABASE_ID"
-
-[env.production]
-name = "15class-history-worker-prod"
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "15class-history-db"
-database_id = "YOUR_PRODUCTION_D1_DATABASE_ID"
+database_id = "caaf84d4-e0eb-4533-ad74-e23996e95c43"
 
 [vars]
-JWT_SECRET = "YOUR_JWT_SECRET_CHANGE_ME_IN_PRODUCTION"
-CORS_ORIGIN = "https://15class-history.pages.dev"
+JWT_SECRET = "/QKcVQlgA24fK3QZwhl/nE57XUDT8fBlhHgq/nqOw88="
+CORS_ORIGIN = "*"
