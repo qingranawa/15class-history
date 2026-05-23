@@ -28,6 +28,22 @@ export async function onRequest(context) {
   try {
     if (path === '/api/auth/login' && method === 'POST') {
       response = await handleLogin(request, env);
+    } else if (path === '/api/auth/login-debug' && method === 'POST') {
+      // 临时调试：详细追踪登录流程
+      const { parseBody, verifyPassword } = await import('../_lib/utils.js');
+      const body = await parseBody(request);
+      const user = await env.DB.prepare('SELECT id, username, password_hash, role FROM users WHERE username = ?').bind(body?.username).first();
+      let verifyResult = null;
+      if (user) verifyResult = await verifyPassword(body.password, user.password_hash);
+      response = jsonResponse({
+        bodyReceived: !!body,
+        username: body?.username,
+        passwordLen: body?.password?.length,
+        userFound: !!user,
+        userId: user?.id,
+        storedHashLen: user?.password_hash?.length,
+        verifyResult
+      });
     } else if (path === '/api/auth/register' && method === 'POST') {
       response = await handleRegister(request, env);
     } else if (path === '/api/auth/me' && method === 'GET') {
