@@ -232,14 +232,23 @@ async function renderDashboard(main) {
 
 // ===================== 视图：素材资料 =====================
 async function renderMaterials(main) {
-  main.innerHTML = `<h1>📁 素材资料</h1><p class="subtitle">${isAtLeast('DraftWriter') ? '查看所有参考资料' : '管理已提交的素材'}</p>
+  const isMaterialCollector = currentUser.role === 'MaterialCollector';
+  main.innerHTML = `<h1>📁 素材资料</h1>
+    <p class="subtitle">${isAtLeast('DraftWriter') ? '查看所有参考资料' : isMaterialCollector ? '整理用户投稿，标记已采用供执笔委员使用' : '管理已提交的素材'}</p>
+    ${isMaterialCollector ? '<div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅内容后可「标记为已采用」→ 执笔委员看到已采用素材进行写史</div>' : ''}
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateMaterialModal()">📤 上传新素材</button>
+      ${isMaterialCollector ? '<select id="matStatusFilter" onchange="renderMaterials(document.getElementById(\'mainContent\'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)"><option value="">全部状态</option><option value="submitted">待整理</option><option value="in_use">已采用</option><option value="archived">已归档</option></select>' : ''}
     </div>
     <div id="materialsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const materials = await api('/materials');
+    let url = '/materials';
+    if (isMaterialCollector) {
+      const filterStatus = document.getElementById('matStatusFilter')?.value || '';
+      if (filterStatus) url += '?status=' + filterStatus;
+    }
+    const materials = await api(url);
     const container = document.getElementById('materialsList');
     if (materials.length === 0) {
       container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无素材资料</p></div>';
@@ -253,13 +262,15 @@ async function renderMaterials(main) {
             <td><strong>${escHtml(m.title)}</strong></td>
             <td>${typeIcon(m.material_type)}</td>
             <td>${escHtml(m.submitter_name || '')}</td>
-            <td>${statusBadge(m.status)}</td>
+            <td>${matStatusBadge(m.status)}</td>
             <td>${fmtDate(m.created_at)}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewMaterial(${m.id})">查看</button>
-                ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteMaterial(${m.id})">删除</button>` : ''}
+                ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>` : ''}
+                ${isMaterialCollector && m.status === 'submitted' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ''}
+                ${isMaterialCollector && m.status === 'in_use' ? `<button class="btn btn-sm" style="background:var(--admin-muted);color:#fff" onclick="markMaterialArchived(${m.id})">📦 归档</button>` : ''}
+                ${canDeleteMaterial(m) ? `<button class="btn btn-sm btn-danger" onclick="deleteMaterial(${m.id})">删除</button>` : ''}
               </div>
             </td>
           </tr>`).join('')}</tbody>
@@ -272,8 +283,36 @@ async function renderMaterials(main) {
 
 function canEditMaterial(m) {
   if (isAtLeast('SupervisorGeneral')) return true;
-  if (currentUser.role === 'MaterialCollector' && m.submitter_id === currentUser.id) return true;
+  if (isAtLeast('MaterialCollector')) return true;
   return false;
+}
+
+function canDeleteMaterial(m) {
+  if (isAtLeast('SupervisorGeneral')) return true;
+  if (m.submitter_id === currentUser.id) return true;
+  return false;
+}
+
+function matStatusBadge(s) {
+  const map = { 'submitted': ['待整理', 'status-pending_review'], 'in_use': ['已采用', 'status-approved'], 'archived': ['已归档', 'status-draft'] };
+  const [label, cls] = map[s] || [s, 'status-draft'];
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+async function markMaterialInUse(id) {
+  try {
+    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'in_use' }) });
+    toast('已标记为采用，执笔委员可查看', 'success');
+    renderMaterials(document.getElementById('mainContent'));
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+async function markMaterialArchived(id) {
+  try {
+    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'archived' }) });
+    toast('已归档', 'success');
+    renderMaterials(document.getElementById('mainContent'));
+  } catch (err) { toast(err.message, 'error'); }
 }
 
 function showCreateMaterialModal() {
