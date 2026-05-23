@@ -61,17 +61,25 @@ export async function handleCreateRecord(request, env) {
     return errorResponse('类型无效', 400);
   }
 
+  const status = body.status || 'draft';
+  if (!['draft', 'pending_review'].includes(status)) {
+    return errorResponse('状态值无效', 400);
+  }
+
   const result = await env.DB.prepare(
     `INSERT INTO records (title, grade, content, honorific, notes, date, type, status, author_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     body.title, body.grade, body.content || '', body.honorific || '',
-    body.notes || '', body.date || '', type, auth.user.id
+    body.notes || '', body.date || '', type, status, auth.user.id
   ).run();
 
   await createAuditLog(env.DB, auth.user.id, 'create_record', 'record', result.meta.last_row_id, `创建史事「${body.title}」`);
+  if (status === 'pending_review') {
+    await createAuditLog(env.DB, auth.user.id, 'submit_review', 'record', result.meta.last_row_id, `提交审核「${body.title}」`);
+  }
 
-  return jsonResponse({ id: result.meta.last_row_id, message: '史事创建成功（草稿状态）' }, 201);
+  return jsonResponse({ id: result.meta.last_row_id, message: status === 'pending_review' ? '史事创建成功并已提交审核' : '史事创建成功（草稿状态）' }, 201);
 }
 
 /** PUT /api/records/:id —— 更新史事 */
@@ -110,13 +118,29 @@ export async function handleUpdateRecord(request, env, recordId) {
   const notes = body.notes !== undefined ? body.notes : record.notes;
   const date = body.date !== undefined ? body.date : record.date;
   const type = body.type !== undefined ? body.type : record.type;
+  const status = body.status !== undefined ? body.status : record.status;
+
+  // 状态变更校验
+  if (status !== record.status) {
+    const allowedStatuses = ['draft', 'pending_review', 'approved', 'rejected'];
+    if (!allowedStatuses.includes(status)) {
+      return errorResponse('状态值无效', 400);
+    }
+    // DraftWriter 只能变更为 draft 或 pending_review 喵
+    if (isAuthor && auth.user.role === 'DraftWriter' && !['draft', 'pending_review'].includes(status)) {
+      return errorResponse('无权设置该状态', 403);
+    }
+  }
 
   await env.DB.prepare(
-    `UPDATE records SET title=?, grade=?, content=?, honorific=?, notes=?, date=?, type=?, updated_at=datetime('now')
+    `UPDATE records SET title=?, grade=?, content=?, honorific=?, notes=?, date=?, type=?, status=?, updated_at=datetime('now')
      WHERE id=?`
-  ).bind(title, grade, content, honorific, notes, date, type, recordId).run();
+  ).bind(title, grade, content, honorific, notes, date, type, status, recordId).run();
 
   await createAuditLog(env.DB, auth.user.id, 'update_record', 'record', recordId, `更新史事「${title}」`);
+  if (status === 'pending_review' && status !== record.status) {
+    await createAuditLog(env.DB, auth.user.id, 'submit_review', 'record', recordId, `提交审核「${title}」`);
+  }
 
   return jsonResponse({ message: '更新成功' });
 }

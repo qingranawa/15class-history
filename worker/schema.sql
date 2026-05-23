@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS materials (
     file_url TEXT,
     submitter_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL DEFAULT 'submitted'
-        CHECK (status IN ('submitted', 'in_use', 'archived')),
+        CHECK (status IN ('submitted', 'organized', 'in_use', 'archived')),
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

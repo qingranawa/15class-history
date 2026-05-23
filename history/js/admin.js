@@ -235,10 +235,10 @@ async function renderMaterials(main) {
   const isMaterialCollector = currentUser.role === 'MaterialCollector';
   main.innerHTML = `<h1>📁 素材资料</h1>
     <p class="subtitle">${isAtLeast('DraftWriter') ? '查看所有参考资料' : isMaterialCollector ? '整理用户投稿，标记已采用供执笔委员使用' : '管理已提交的素材'}</p>
-    ${isMaterialCollector ? '<div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅内容后可「标记为已采用」→ 执笔委员看到已采用素材进行写史</div>' : ''}
+    ${isMaterialCollector ? '<div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>' : ''}
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateMaterialModal()">📤 上传新素材</button>
-      ${isMaterialCollector ? '<select id="matStatusFilter" onchange="renderMaterials(document.getElementById(\'mainContent\'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)"><option value="">全部状态</option><option value="submitted">待整理</option><option value="in_use">已采用</option><option value="archived">已归档</option></select>' : ''}
+      ${isMaterialCollector ? '<select id="matStatusFilter" onchange="renderMaterials(document.getElementById(\'mainContent\'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)"><option value="">全部状态</option><option value="submitted">待整理</option><option value="organized">已整理</option><option value="in_use">已采用</option><option value="archived">已归档</option></select>' : ''}
     </div>
     <div id="materialsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
@@ -268,7 +268,8 @@ async function renderMaterials(main) {
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewMaterial(${m.id})">查看</button>
                 ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>` : ''}
-                ${isMaterialCollector && m.status === 'submitted' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ''}
+                ${isMaterialCollector && m.status === 'submitted' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialOrganized(${m.id})">📋 已整理确认</button>` : ''}
+                ${isMaterialCollector && m.status === 'organized' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ''}
                 ${isMaterialCollector && m.status === 'in_use' ? `<button class="btn btn-sm" style="background:var(--admin-muted);color:#fff" onclick="markMaterialArchived(${m.id})">📦 归档</button>` : ''}
                 ${canDeleteMaterial(m) ? `<button class="btn btn-sm btn-danger" onclick="deleteMaterial(${m.id})">删除</button>` : ''}
               </div>
@@ -294,9 +295,17 @@ function canDeleteMaterial(m) {
 }
 
 function matStatusBadge(s) {
-  const map = { 'submitted': ['待整理', 'status-pending_review'], 'in_use': ['已采用', 'status-approved'], 'archived': ['已归档', 'status-draft'] };
+  const map = { 'submitted': ['待整理', 'status-pending_review'], 'organized': ['已整理', 'status-pending_review'], 'in_use': ['已采用', 'status-approved'], 'archived': ['已归档', 'status-draft'] };
   const [label, cls] = map[s] || [s, 'status-draft'];
   return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+async function markMaterialOrganized(id) {
+  try {
+    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'organized' }) });
+    toast('已确认整理，可标记为采用', 'success');
+    renderMaterials(document.getElementById('mainContent'));
+  } catch (err) { toast(err.message, 'error'); }
 }
 
 async function markMaterialInUse(id) {
@@ -494,10 +503,12 @@ function showCreateDraftModal() {
       notes: formValue('draftNotes'),
     };
     if (!body.title || !body.grade) throw new Error('标题和学期为必填项');
-    const result = await api('/records', { method: 'POST', body: JSON.stringify(body) });
-    // 如果勾选了自动提交
+    // 勾选了"创建后直接提交审核" → 直接以 pending_review 状态创建，跳过草稿阶段喵
     if (document.getElementById('draftAutoSubmit').checked) {
-      await api(`/records/${result.id}/submit-review`, { method: 'POST' });
+      body.status = 'pending_review';
+    }
+    const result = await api('/records', { method: 'POST', body: JSON.stringify(body) });
+    if (body.status === 'pending_review') {
       toast('稿件已创建并提交审核', 'success');
     } else {
       toast('稿件创建成功（草稿状态），记得点「提交审核」', 'info');
@@ -537,17 +548,24 @@ async function editDraft(id) {
     <div class="form-group"><label>正文</label><textarea id="draftContent" style="min-height:200px">${escHtml(r.content)}</textarea></div>
     <div class="form-group"><label>评语</label><input id="draftHonorific" value="${escAttr(r.honorific || '')}" /></div>
     <div class="form-group"><label>注释</label><input id="draftNotes" value="${escAttr(r.notes || '')}" /></div>
+    <div class="form-group" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#f59e0b">
+        <input type="checkbox" id="draftAutoSubmit" style="width:auto;accent-color:#f59e0b" />
+        保存并提交审核
+      </label>
+    </div>
   `, async () => {
-    await api(`/records/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        title: formValue('draftTitle'), grade: formValue('draftGrade'),
-        type: formValue('draftType'), date: formValue('draftDate'),
-        content: formValue('draftContent'), honorific: formValue('draftHonorific'),
-        notes: formValue('draftNotes'),
-      }),
-    });
-    toast('稿件已更新', 'success');
+    const body = {
+      title: formValue('draftTitle'), grade: formValue('draftGrade'),
+      type: formValue('draftType'), date: formValue('draftDate'),
+      content: formValue('draftContent'), honorific: formValue('draftHonorific'),
+      notes: formValue('draftNotes'),
+    };
+    if (document.getElementById('draftAutoSubmit').checked) {
+      body.status = 'pending_review';
+    }
+    await api(`/records/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    toast(body.status === 'pending_review' ? '稿件已保存并提交审核' : '稿件已更新', 'success');
     renderDrafts(document.getElementById('mainContent'));
   });
 }
