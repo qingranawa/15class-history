@@ -42,6 +42,22 @@ export async function onRequest(context) {
       response = await handleUsersRoute(request, env, path);
     } else if (path === '/api/health') {
       response = jsonResponse({ status: 'ok', timestamp: new Date().toISOString() });
+    } else if (path === '/api/debug/hash') {
+      // 调试端点：生成测试哈希
+      const { hashPassword, verifyPassword } = await import('../_lib/utils.js');
+      const h = await hashPassword('admin123456');
+      const v = await verifyPassword('admin123456', h);
+      response = jsonResponse({ hash: h, verify: v, algo: 'PBKDF2-SHA256-100000' });
+    } else if (path === '/api/debug/verify') {
+      // 调试端点：验证现有用户密码
+      const { verifyPassword } = await import('../_lib/utils.js');
+      const user = await env.DB.prepare('SELECT * FROM users WHERE id = 2').first();
+      const v = await verifyPassword('admin123456', user.password_hash);
+      response = jsonResponse({
+        userId: user.id,
+        verify: v,
+        hashPreview: user.password_hash.substring(0, 32) + '...'
+      });
     } else {
       response = errorResponse('API 路由不存在', 404);
     }
