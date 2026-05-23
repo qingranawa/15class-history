@@ -441,6 +441,12 @@ function showCreateDraftModal() {
     <div class="form-group"><label>正文 *</label><textarea id="draftContent" placeholder="史事正文，支持 [b]粗体[/b]、[=]居中[/=]、[poem]诗歌[/poem] 等标签" style="min-height:200px"></textarea></div>
     <div class="form-group"><label>评语</label><input id="draftHonorific" placeholder="如：—— 史称XXX，为15班XXX之始。" /></div>
     <div class="form-group"><label>注释</label><input id="draftNotes" placeholder="补充说明（可选）" /></div>
+    <div class="form-group" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#f59e0b">
+        <input type="checkbox" id="draftAutoSubmit" style="width:auto;accent-color:#f59e0b" />
+        创建后直接提交审核（跳过草稿阶段）
+      </label>
+    </div>
   `, async () => {
     const body = {
       title: formValue('draftTitle'), grade: formValue('draftGrade'),
@@ -449,9 +455,16 @@ function showCreateDraftModal() {
       notes: formValue('draftNotes'),
     };
     if (!body.title || !body.grade) throw new Error('标题和学期为必填项');
-    await api('/records', { method: 'POST', body: JSON.stringify(body) });
-    toast('稿件创建成功（草稿状态）', 'success');
+    const result = await api('/records', { method: 'POST', body: JSON.stringify(body) });
+    // 如果勾选了自动提交
+    if (document.getElementById('draftAutoSubmit').checked) {
+      await api(`/records/${result.id}/submit-review`, { method: 'POST' });
+      toast('稿件已创建并提交审核', 'success');
+    } else {
+      toast('稿件创建成功（草稿状态），记得点「提交审核」', 'info');
+    }
     renderDrafts(document.getElementById('mainContent'));
+    updateReviewBadge();
   });
 }
 
