@@ -61,10 +61,10 @@ export async function handleUpdateMaterial(request, env, matId) {
   const existing = await env.DB.prepare('SELECT * FROM materials WHERE id = ?').bind(matId).first();
   if (!existing) return errorResponse('素材不存在', 404);
 
-  // 本人可改自己的，管理员可改所有
+  // 本人可改自己的，执书委员+可改所有
   const isOwner = existing.submitter_id === auth.user.id;
-  const isAdmin = !requireRole(auth.user, 'SupervisorGeneral');
-  if (!isOwner && !isAdmin) {
+  const isEditor = !requireRole(auth.user, 'MaterialCollector');
+  if (!isOwner && !isEditor) {
     return errorResponse('只能修改自己提交的素材', 403);
   }
 
@@ -75,11 +75,12 @@ export async function handleUpdateMaterial(request, env, matId) {
   const content = body.content !== undefined ? body.content : existing.content;
   const materialType = body.materialType !== undefined ? body.materialType : existing.material_type;
   const fileUrl = body.fileUrl !== undefined ? body.fileUrl : existing.file_url;
+  const status = body.status !== undefined ? body.status : existing.status;
 
   await env.DB.prepare(
-    `UPDATE materials SET title=?, content=?, material_type=?, file_url=?, updated_at=datetime('now')
+    `UPDATE materials SET title=?, content=?, material_type=?, file_url=?, status=?, updated_at=datetime('now')
      WHERE id=?`
-  ).bind(title, content, materialType, fileUrl, matId).run();
+  ).bind(title, content, materialType, fileUrl, status, matId).run();
 
   await createAuditLog(env.DB, auth.user.id, 'update_material', 'material', matId, `修改素材「${title}」`);
 
