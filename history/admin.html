@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>班史编纂委员会 · 管理面板</title>
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <!-- 登录页面 -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <h1>📜 编纂委员会</h1>
+      <p>请使用编纂委员账号登录管理面板</p>
+      <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username" />
+      <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password" />
+      <button class="login-btn" id="loginBtn">登入管理系统</button>
+      <div class="error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- 管理界面（登录后显示） -->
+  <div id="adminApp" style="display:none">
+    <!-- 侧边栏 -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <h2>📜 编纂委员会</h2>
+        <div class="user-info" id="sidebarUser"></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+      <div class="sidebar-footer">
+        <button onclick="logout()">🚪 退出登录</button>
+      </div>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="admin-main" id="mainContent"></main>
+  </div>
+
+  <!-- Toast 容器 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- 通用模态框 -->
+  <div id="modalOverlay" class="modal-overlay" style="display:none">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

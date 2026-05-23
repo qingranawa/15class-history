@@ -1,0 +1,21 @@
+name = "15class-history-worker"
+main = "src/index.js"
+compatibility_date = "2025-05-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "15class-history-db"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[env.production]
+name = "15class-history-worker-prod"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "15class-history-db"
+database_id = "YOUR_PRODUCTION_D1_DATABASE_ID"
+
+[vars]
+JWT_SECRET = "YOUR_JWT_SECRET_CHANGE_ME_IN_PRODUCTION"
+CORS_ORIGIN = "https://15class-history.pages.dev"

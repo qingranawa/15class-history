@@ -15,7 +15,7 @@
 // \n: 换行符在content和honorific中会被渲染为<br>，在notes中会被渲染为\n
 // ======================= 班史数据 =======================
 
-const historyData = {
+var historyData = {
   records: [
     // ========== 七上 ========== //
     {
@@ -284,7 +284,7 @@ const historyData = {
 };
 
 // ======================= 相关人物数据（完整版） =======================
-const characters = [
+var characters = [
   {
     name: "马桓",
     nicknames: ["屎高祖", "屎皇帝"],
@@ -440,11 +440,11 @@ const characters = [
 ];
 
 // ======================= 外史数据 =======================
-const extraHistory = {
+var extraHistory = {
   records: [],
 };
 
 // ======================= 戏史数据 =======================
-const dramaHistory = {
+var dramaHistory = {
   records: [],
 };
