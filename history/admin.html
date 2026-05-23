@@ -11,10 +11,21 @@
   <div id="loginPage" class="login-page">
     <div class="login-card">
       <h1>📜 编纂委员会</h1>
-      <p>请使用编纂委员账号登录管理面板</p>
-      <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username" />
-      <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password" />
-      <button class="login-btn" id="loginBtn">登入管理系统</button>
+      <div class="login-tabs">
+        <button class="login-tab active" data-tab="login">🔑 登录</button>
+        <button class="login-tab" data-tab="register">📝 注册</button>
+      </div>
+      <div id="loginForm">
+        <input type="text" id="loginUsername" placeholder="用户名" autocomplete="username" />
+        <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password" />
+        <button class="login-btn" id="loginBtn">登入管理系统</button>
+      </div>
+      <div id="registerForm" style="display:none">
+        <p style="font-size:12px;color:var(--admin-warning);margin-bottom:8px">⚠️ 账户名不能包含中文，请使用英文或拼音</p>
+        <input type="text" id="regUsername" placeholder="用户名（英文/拼音）" autocomplete="off" />
+        <input type="password" id="regPassword" placeholder="密码" value="admin123456" autocomplete="new-password" />
+        <button class="login-btn" id="registerBtn" style="background:var(--admin-success)">注册新账户</button>
+      </div>
       <div class="error" id="loginError"></div>
     </div>
   </div>

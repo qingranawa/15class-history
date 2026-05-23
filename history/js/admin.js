@@ -932,6 +932,38 @@ function statusBadge(s) {
   return `<span class="status-badge status-${s}">${statusLabel(s)}</span>`;
 }
 
+// ===================== 注册 =====================
+async function register() {
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value.trim();
+  const errorEl = document.getElementById('loginError');
+  if (!username || !password) { errorEl.textContent = '请填写用户名和密码'; return; }
+  if (/[一-鿿]/.test(username)) { errorEl.textContent = '账户名不能包含中文，请使用英文或拼音'; return; }
+
+  try {
+    const data = await api('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
+    toast(data.message || '注册成功', 'success');
+    // 自动填充登录表单
+    document.getElementById('loginUsername').value = username;
+    document.getElementById('loginPassword').value = password;
+    // 切换到登录模式
+    switchTab('login');
+    errorEl.textContent = '';
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('loginError').textContent = '';
+}
+
 // ===================== 初始化 =====================
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('loginBtn').addEventListener('click', login);
@@ -940,6 +972,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('loginUsername').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+  });
+  document.getElementById('registerBtn').addEventListener('click', register);
+  document.getElementById('regPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') register();
+  });
+  document.getElementById('regUsername').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('regPassword').focus();
+  });
+  document.querySelectorAll('.login-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
   });
   checkAutoLogin();
 });

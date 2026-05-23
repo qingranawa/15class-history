@@ -326,6 +326,30 @@ body {
 
 .login-card .error { color: var(--admin-danger); font-size: 13px; margin-top: 12px; }
 
+.login-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+
+.login-tab {
+  flex: 1;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.login-tab.active {
+  background: var(--admin-primary);
+  border-color: var(--admin-primary);
+  color: #fff;
+}
+
+.login-tab:hover:not(.active) { border-color: var(--admin-primary-hover); color: var(--admin-primary-hover); }
+
+#registerForm p { margin-bottom: 12px; }
+
 /* ===== 模态框 ===== */
 .modal-overlay {
   position: fixed;

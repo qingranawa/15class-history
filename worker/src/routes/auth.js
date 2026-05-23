@@ -41,20 +41,34 @@ export async function handleRegister(request, env) {
   if (body.password.length < 6) {
     return errorResponse('密码长度至少 6 位', 400);
   }
+  // 禁止中文用户名
+  if (/[一-鿿㐀-䶿]/.test(body.username)) {
+    return errorResponse('账户名不能包含中文，请使用英文或拼音', 400);
+  }
 
   // 检查是否已存在用户（首个注册用户自动成为 Chairperson）
   const { count } = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first();
   const isFirstUser = count === 0;
 
-  // 非首个用户需要认证 + 管理员权限
+  // 确定角色：首用户 → Chairperson，管理员操作 → 指定角色，自注册 → user
+  let role = 'user';
   let actorUser = null;
-  if (!isFirstUser) {
+  if (isFirstUser) {
+    role = 'Chairperson';
+  } else {
     const auth = await withAuth(request, env);
-    if (auth.error) return errorResponse(auth.error, auth.status);
-    if (auth.user.role !== 'Chairperson' && auth.user.role !== 'ExecutiveDeputyChair' && auth.user.role !== 'SupervisorGeneral' && auth.user.role !== 'DeputySupervisor') {
-      return errorResponse('权限不足', 403);
+    if (!auth.error) {
+      // 已登录的管理员可以指定角色
+      const adminRoles = ['Chairperson', 'ExecutiveDeputyChair', 'SupervisorGeneral', 'DeputySupervisor'];
+      if (adminRoles.includes(auth.user.role)) {
+        actorUser = auth.user;
+        if (body.role && adminRoles.includes(body.role) && auth.user.role !== 'Chairperson' && auth.user.role !== 'ExecutiveDeputyChair') {
+          return errorResponse('无权设置此角色', 403);
+        }
+        role = body.role || 'user';
+      }
     }
-    actorUser = auth.user;
+    // 无管理员 token → role 保持 'user'（自注册）
   }
 
   // 检查用户名唯一
@@ -62,8 +76,6 @@ export async function handleRegister(request, env) {
   if (existing) return errorResponse('用户名已被占用', 409);
 
   const passwordHash = await hashPassword(body.password);
-  const role = isFirstUser ? 'Chairperson' : (body.role || 'user');
-
   const result = await env.DB.prepare(
     'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)'
   ).bind(body.username, passwordHash, role).run();
@@ -76,7 +88,7 @@ export async function handleRegister(request, env) {
     id: result.meta.last_row_id,
     username: body.username,
     role,
-    message: isFirstUser ? '首个管理员账户创建成功' : '用户创建成功',
+    message: isFirstUser ? '首个管理员账户创建成功' : (actorUser ? '委员账号创建成功' : '注册成功，等待管理员分配权限'),
   }, 201);
 }
 
