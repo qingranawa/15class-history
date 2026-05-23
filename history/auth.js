@@ -56,6 +56,10 @@ function showWelcomeMessage(username, role, isDev) {
       adminLink.onmouseleave = function() { this.style.background = 'rgba(99,102,241,0.3)'; };
       welcomeDiv.appendChild(adminLink);
     }
+
+    // 显示投稿按钮（所有登录用户）
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) submitBtn.style.display = '';
   }
   hero.insertAdjacentElement('afterend', welcomeDiv);
 }
@@ -290,4 +294,35 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.auth-tab').forEach(tab => {
     tab.addEventListener('click', () => switchAuthTab(tab.dataset.tab));
   });
+
+  // 投稿处理
+  const submitBtn = document.getElementById('submitBtn');
+  const submitMaterialBtn = document.getElementById('submitMaterialBtn');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', () => {
+      document.getElementById('submitModal').classList.remove('hidden');
+      document.getElementById('submitError').textContent = '';
+      document.getElementById('submitSuccess').textContent = '';
+    });
+  }
+  if (submitMaterialBtn) {
+    submitMaterialBtn.addEventListener('click', async () => {
+      const title = document.getElementById('submitTitle').value.trim();
+      const content = document.getElementById('submitContent').value.trim();
+      const errEl = document.getElementById('submitError');
+      const okEl = document.getElementById('submitSuccess');
+      errEl.textContent = ''; okEl.textContent = '';
+      if (!title) { errEl.textContent = '请填写投稿标题'; return; }
+      if (!content) { errEl.textContent = '请填写投稿内容'; return; }
+      try {
+        await apiFetch('/materials', { method: 'POST', body: JSON.stringify({ title, content, materialType: 'text' }) });
+        okEl.textContent = '投稿成功！执书委员会整理后交给执笔委员写史';
+        document.getElementById('submitTitle').value = '';
+        document.getElementById('submitContent').value = '';
+        setTimeout(() => document.getElementById('submitModal').classList.add('hidden'), 1500);
+      } catch (err) {
+        errEl.textContent = err.message;
+      }
+    });
+  }
 });

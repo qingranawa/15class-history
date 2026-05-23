@@ -100,6 +100,7 @@
     <div class="container hidden" id="mainContent">
       <nav class="page-nav">
         <div class="nav-group">
+          <button class="nav-btn" id="submitBtn" data-nav="submit" style="display:none">📝 我要投稿</button>
           <button class="nav-btn" data-nav="contribute">📝 如何投稿</button>
           <button class="nav-btn" data-nav="joinus">🤝 加入我们</button>
         </div>
@@ -216,6 +217,22 @@
 
     <!-- 返回顶部按钮 -->
     <button id="backToTop" class="back-to-top" aria-label="返回顶部">↑</button>
+
+    <!-- 投稿模态框 -->
+    <div id="submitModal" class="auth-modal hidden">
+      <div class="auth-modal-content" style="max-width:520px">
+        <h2>📝 投稿</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:12px">向编纂委员会提供班级史事素材</p>
+        <input type="text" id="submitTitle" placeholder="投稿标题（必填）" style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text);font-size:14px" />
+        <textarea id="submitContent" placeholder="投稿内容...&#10;描述你观察到/经历的值得记录的事情" style="width:100%;padding:10px;min-height:120px;margin-bottom:10px;border-radius:8px;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text);font-size:14px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px">
+          <button id="submitMaterialBtn" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:14px">提交投稿</button>
+          <button onclick="document.getElementById('submitModal').classList.add('hidden')" style="padding:10px 20px;border:1px solid var(--border-light);border-radius:8px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px">取消</button>
+        </div>
+        <div id="submitError" style="color:#ff8a8a;margin-top:8px;font-size:13px"></div>
+        <div id="submitSuccess" style="color:#4ade80;margin-top:8px;font-size:13px"></div>
+      </div>
+    </div>
 
     <script>
       document.getElementById("currentYear").innerText =

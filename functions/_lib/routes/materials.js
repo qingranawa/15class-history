@@ -7,17 +7,14 @@ export async function handleListMaterials(request, env) {
   const auth = await withAuth(request, env);
   if (auth.error) return errorResponse(auth.error, auth.status);
 
-  const roleErr = requireRole(auth.user, 'MaterialCollector');
-  if (roleErr) return errorResponse(roleErr.error, roleErr.status);
-
   const url = new URL(request.url);
   const status = url.searchParams.get('status');
 
   let sql = 'SELECT m.*, u.username as submitter_name FROM materials m LEFT JOIN users u ON m.submitter_id = u.id WHERE 1=1';
   const binds = [];
 
-  // 执书委员只看到自己的
-  if (auth.user.role === 'MaterialCollector') {
+  // 普通用户只看自己的，执书委员及以上看全部
+  if (auth.user.role === 'user') {
     sql += ' AND m.submitter_id = ?';
     binds.push(auth.user.id);
   }
@@ -33,13 +30,10 @@ export async function handleListMaterials(request, env) {
   return jsonResponse(results);
 }
 
-/** POST /api/materials —— 上传素材 */
+/** POST /api/materials —— 上传素材（任何登录用户均可投稿） */
 export async function handleCreateMaterial(request, env) {
   const auth = await withAuth(request, env);
   if (auth.error) return errorResponse(auth.error, auth.status);
-
-  const roleErr = requireRole(auth.user, 'MaterialCollector');
-  if (roleErr) return errorResponse(roleErr.error, roleErr.status);
 
   const body = await parseBody(request);
   if (!body || !body.title) return errorResponse('素材标题为必填项', 400);
@@ -56,22 +50,21 @@ export async function handleCreateMaterial(request, env) {
 
   await createAuditLog(env.DB, auth.user.id, 'create_material', 'material', result.meta.last_row_id, `上传素材「${body.title}」`);
 
-  return jsonResponse({ id: result.meta.last_row_id, message: '素材上传成功' }, 201);
+  return jsonResponse({ id: result.meta.last_row_id, message: '投稿成功' }, 201);
 }
 
-/** PUT /api/materials/:id —— 修改素材 */
+/** PUT /api/materials/:id —— 修改素材（提交者本人或管理员） */
 export async function handleUpdateMaterial(request, env, matId) {
   const auth = await withAuth(request, env);
   if (auth.error) return errorResponse(auth.error, auth.status);
 
-  const roleErr = requireRole(auth.user, 'MaterialCollector');
-  if (roleErr) return errorResponse(roleErr.error, roleErr.status);
-
   const existing = await env.DB.prepare('SELECT * FROM materials WHERE id = ?').bind(matId).first();
   if (!existing) return errorResponse('素材不存在', 404);
 
-  // 执书委员只能修改自己的
-  if (auth.user.role === 'MaterialCollector' && existing.submitter_id !== auth.user.id) {
+  // 本人可改自己的，管理员可改所有
+  const isOwner = existing.submitter_id === auth.user.id;
+  const isAdmin = !requireRole(auth.user, 'SupervisorGeneral');
+  if (!isOwner && !isAdmin) {
     return errorResponse('只能修改自己提交的素材', 403);
   }
 
