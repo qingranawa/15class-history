@@ -1,6 +1,6 @@
 // ===================== 工具函数 =====================
 
-/** Base64URL 编码（支持 UTF-8） */
+/** 字符串 → Base64URL（自动处理非 ASCII 字符） */
 function base64UrlEncode(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
@@ -10,7 +10,16 @@ function base64UrlEncode(str) {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-/** Base64URL 解码（支持 UTF-8） */
+/** 原始字节 → Base64URL（用于签名等二进制数据） */
+function base64UrlEncodeRaw(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+/** Base64URL → Uint8Array（解码为原始字节，文本需用 TextDecoder 还原） */
 function base64UrlDecode(str) {
   str = str.replace(/-/g, '+').replace(/_/g, '/');
   while (str.length % 4) str += '=';
@@ -19,7 +28,7 @@ function base64UrlDecode(str) {
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return new TextDecoder().decode(bytes);
+  return bytes;
 }
 
 // ===================== CORS =====================
@@ -116,7 +125,7 @@ export async function signJWT(payload, secret) {
     { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
   const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
-  const encodedSig = base64UrlEncode(String.fromCharCode(...new Uint8Array(sig)));
+  const encodedSig = base64UrlEncodeRaw(new Uint8Array(sig));
   return `${data}.${encodedSig}`;
 }
 
@@ -131,12 +140,11 @@ export async function verifyJWT(token, secret) {
       'raw', encoder.encode(secret),
       { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
     );
-    const sig = new Uint8Array(
-      base64UrlDecode(encodedSig).split('').map(c => c.charCodeAt(0))
-    );
+    const sig = base64UrlDecode(encodedSig);
     const valid = await crypto.subtle.verify('HMAC', key, sig, encoder.encode(data));
     if (!valid) return null;
-    const payload = JSON.parse(base64UrlDecode(encodedPayload));
+    const payloadBytes = base64UrlDecode(encodedPayload);
+    const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
     // 检查过期（24小时）
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
     return payload;
