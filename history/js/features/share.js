@@ -1,8 +1,9 @@
 // js/share.js — 分享卡片
-import { escapeHtml, formatContent } from '../utils.js';
+/* global html2canvas */
+import { escapeHtml, formatContent } from "../utils.js";
 
 export function shareRecord(record) {
-    const card = document.createElement('div');
+    const card = document.createElement("div");
     card.style.cssText = `
         width: 600px;
         padding: 40px;
@@ -17,7 +18,7 @@ export function shareRecord(record) {
         z-index: -1;
     `;
 
-    let dateHtml = '';
+    let dateHtml = "";
     if (record.date) {
         const d = new Date(record.date);
         if (!isNaN(d)) {
@@ -29,7 +30,7 @@ export function shareRecord(record) {
 
     const gradeTag = record.grade
         ? `<span style="display:inline-block;background:rgba(201,169,89,0.15);color:#e0c47a;padding:2px 12px;border-radius:20px;font-size:0.75rem;margin-bottom:16px;">${escapeHtml(record.grade)}</span>`
-        : '';
+        : "";
 
     card.innerHTML = `
         <div style="text-align:center;margin-bottom:24px;">
@@ -43,7 +44,7 @@ export function shareRecord(record) {
             ${formatContent(record.content)}
         </div>
         <div style="margin-top:24px;padding-top:16px;border-top:1px dashed rgba(201,169,89,0.2);text-align:right;color:#c9a959;font-size:0.85rem;">
-            ${escapeHtml(record.honorific || '')}
+            ${escapeHtml(record.honorific || "")}
         </div>
         <div style="margin-top:32px;padding-top:16px;border-top:1px solid rgba(201,169,89,0.1);text-align:center;color:#6b7380;font-size:0.75rem;">
             2025级15班 · 班级史记
@@ -52,14 +53,14 @@ export function shareRecord(record) {
 
     document.body.appendChild(card);
 
-    if (typeof html2canvas === 'undefined') {
+    if (typeof html2canvas === "undefined") {
         card.remove();
-        alert('html2canvas 加载中，请稍后再试');
+        alert("html2canvas 加载中，请稍后再试");
         return;
     }
 
     html2canvas(card, {
-        backgroundColor: '#0b0c0e',
+        backgroundColor: "#0b0c0e",
         scale: 2,
         useCORS: true,
         logging: false
@@ -67,7 +68,7 @@ export function shareRecord(record) {
         card.remove();
         canvas.toBlob(blob => {
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
             a.download = `${record.title}_史记分享.png`;
             a.click();
@@ -75,7 +76,7 @@ export function shareRecord(record) {
         });
     }).catch(err => {
         card.remove();
-        console.error('分享卡片生成失败:', err);
-        alert('生成分享卡片失败，请查看控制台错误');
+        console.error("分享卡片生成失败:", err);
+        alert("生成分享卡片失败，请查看控制台错误");
     });
 }

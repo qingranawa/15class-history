@@ -6,4 +6,5 @@ package-lock.json
 package.json
 !worker/package.json
 .eslintcache
-CLAUDE.md
+.cspell.json
+.markdownlint.json

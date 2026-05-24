@@ -1,25 +1,25 @@
 // ===================== 管理面板 JS =====================
-const API_BASE = '/api';
+const API_BASE = "/api";
 let currentUser = null;
 
 // ===================== Auth =====================
-function getToken() { return localStorage.getItem('admin_token'); }
-function setToken(t) { localStorage.setItem('admin_token', t); }
-function clearToken() { localStorage.removeItem('admin_token'); }
+function getToken() { return localStorage.getItem("admin_token"); }
+function setToken(t) { localStorage.setItem("admin_token", t); }
+function clearToken() { localStorage.removeItem("admin_token"); }
 
 async function api(path, options = {}) {
   const token = getToken();
-  const headers = { 'Content-Type': 'application/json', ...options.headers };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const headers = { "Content-Type": "application/json", ...options.headers };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || '请求失败');
+  if (!res.ok) throw new Error(data.error || "请求失败");
   return data;
 }
 
-function toast(msg, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const el = document.createElement('div');
+function toast(msg, type = "info") {
+  const container = document.getElementById("toastContainer");
+  const el = document.createElement("div");
   el.className = `toast toast-${type}`;
   el.textContent = msg;
   container.appendChild(el);
@@ -28,25 +28,25 @@ function toast(msg, type = 'info') {
 
 // ===================== 登录 =====================
 async function login() {
-  const username = document.getElementById('loginUsername').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errorEl = document.getElementById('loginError');
-  if (!username || !password) { errorEl.textContent = '请填写用户名和密码'; return; }
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errorEl = document.getElementById("loginError");
+  if (!username || !password) { errorEl.textContent = "请填写用户名和密码"; return; }
 
   try {
-    const data = await api('/auth/login', {
-      method: 'POST',
+    const data = await api("/auth/login", {
+      method: "POST",
       body: JSON.stringify({ username, password }),
     });
     // 检查是否有管理权限（非普通 user）
-    if (data.user.role === 'user') {
-      errorEl.textContent = '普通用户请从主页登录，管理面板仅限编纂委员访问';
+    if (data.user.role === "user") {
+      errorEl.textContent = "普通用户请从主页登录，管理面板仅限编纂委员访问";
       return;
     }
     setToken(data.token);
     currentUser = data.user;
     showApp();
-    toast(`欢迎，${data.user.username}！`, 'success');
+    toast(`欢迎，${data.user.username}！`, "success");
   } catch (err) {
     errorEl.textContent = err.message;
   }
@@ -55,159 +55,159 @@ async function login() {
 function logout() {
   clearToken();
   currentUser = null;
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('adminApp').style.display = 'none';
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPassword').value = '';
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("adminApp").style.display = "none";
+  document.getElementById("loginUsername").value = "";
+  document.getElementById("loginPassword").value = "";
 }
 
 async function checkAutoLogin() {
   const token = getToken();
   if (!token) return;
   try {
-    const data = await api('/auth/me');
-    if (data.role === 'user') { clearToken(); return; }
+    const data = await api("/auth/me");
+    if (data.role === "user") { clearToken(); return; }
     currentUser = data;
     showApp();
   } catch { clearToken(); }
 }
 
 function showApp() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('adminApp').style.display = 'flex';
-  document.getElementById('sidebarUser').textContent =
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("adminApp").style.display = "flex";
+  document.getElementById("sidebarUser").textContent =
     `${currentUser.username} · ${roleLabel(currentUser.role)}`;
   buildNav();
-  navigate('dashboard');
+  navigate("dashboard");
 }
 
 // ===================== 角色标签 =====================
 function roleLabel(role) {
   const map = {
-    'Chairperson': '主任委员',
-    'ExecutiveDeputyChair': '常务副主任委员',
-    'SupervisorGeneral': '总监制委员',
-    'DeputySupervisor': '总副监制委员',
-    'Reviewer': '审定委员',
-    'DraftWriter': '执笔委员',
-    'MaterialCollector': '执书委员',
-    'user': '普通用户',
+    "Chairperson": "主任委员",
+    "ExecutiveDeputyChair": "常务副主任委员",
+    "SupervisorGeneral": "总监制委员",
+    "DeputySupervisor": "总副监制委员",
+    "Reviewer": "审定委员",
+    "DraftWriter": "执笔委员",
+    "MaterialCollector": "执书委员",
+    "user": "普通用户",
   };
   return map[role] || role;
 }
 
 function statusLabel(s) {
-  const map = { 'draft': '草稿', 'pending_review': '待审核', 'approved': '已通过', 'rejected': '已驳回' };
+  const map = { "draft": "草稿", "pending_review": "待审核", "approved": "已通过", "rejected": "已驳回" };
   return map[s] || s;
 }
 
 // ===================== 权限判断 =====================
 function isAtLeast(role) {
-  const levels = { 'user':0, 'MaterialCollector':1, 'DraftWriter':2, 'Reviewer':3, 'SupervisorGeneral':4, 'DeputySupervisor':4, 'Chairperson':5, 'ExecutiveDeputyChair':5 };
+  const levels = { "user":0, "MaterialCollector":1, "DraftWriter":2, "Reviewer":3, "SupervisorGeneral":4, "DeputySupervisor":4, "Chairperson":5, "ExecutiveDeputyChair":5 };
   return (levels[currentUser.role] || 0) >= (levels[role] || 0);
 }
 
 // ===================== 导航 =====================
 function buildNav() {
-  const nav = document.getElementById('sidebarNav');
+  const nav = document.getElementById("sidebarNav");
   const items = [];
 
-  items.push({ id: 'dashboard', icon: '📊', label: '工作台' });
+  items.push({ id: "dashboard", icon: "📊", label: "工作台" });
 
-  if (isAtLeast('MaterialCollector')) {
-    items.push({ id: 'materials', icon: '📁', label: '素材资料' });
+  if (isAtLeast("MaterialCollector")) {
+    items.push({ id: "materials", icon: "📁", label: "素材资料" });
   }
-  if (isAtLeast('DraftWriter')) {
-    items.push({ id: 'drafts', icon: '✍️', label: '史事稿件' });
+  if (isAtLeast("DraftWriter")) {
+    items.push({ id: "drafts", icon: "✍️", label: "史事稿件" });
   }
-  if (isAtLeast('Reviewer')) {
-    items.push({ id: 'review', icon: '🔍', label: '待审稿件', badge: true });
+  if (isAtLeast("Reviewer")) {
+    items.push({ id: "review", icon: "🔍", label: "待审稿件", badge: true });
   }
-  if (isAtLeast('SupervisorGeneral')) {
-    items.push({ id: 'records', icon: '📜', label: '全部史事' });
-    items.push({ id: 'characters', icon: '👥', label: '人物管理' });
-    items.push({ id: 'users', icon: '👤', label: '委员管理' });
+  if (isAtLeast("SupervisorGeneral")) {
+    items.push({ id: "records", icon: "📜", label: "全部史事" });
+    items.push({ id: "characters", icon: "👥", label: "人物管理" });
+    items.push({ id: "users", icon: "👤", label: "委员管理" });
   }
-  if (currentUser.role === 'Chairperson' || currentUser.role === 'ExecutiveDeputyChair') {
-    items.push({ id: 'logs', icon: '📋', label: '操作日志' });
-    items.push({ id: 'config', icon: '⚙️', label: '系统配置' });
+  if (currentUser.role === "Chairperson" || currentUser.role === "ExecutiveDeputyChair") {
+    items.push({ id: "logs", icon: "📋", label: "操作日志" });
+    items.push({ id: "config", icon: "⚙️", label: "系统配置" });
   }
 
   nav.innerHTML = items.map(i =>
     `<a data-nav="${i.id}" onclick="navigate('${i.id}')">
       ${i.icon} <span>${i.label}</span>
-      ${i.badge ? '<span class="badge" id="reviewBadge"></span>' : ''}
+      ${i.badge ? "<span class=\"badge\" id=\"reviewBadge\"></span>" : ""}
     </a>`
-  ).join('');
+  ).join("");
 
   // 更新待审核数量
-  if (isAtLeast('Reviewer')) updateReviewBadge();
+  if (isAtLeast("Reviewer")) updateReviewBadge();
 }
 
 function navigate(view) {
-  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll(".sidebar-nav a").forEach(a => a.classList.remove("active"));
   const link = document.querySelector(`[data-nav="${view}"]`);
-  if (link) link.classList.add('active');
+  if (link) link.classList.add("active");
 
-  const main = document.getElementById('mainContent');
+  const main = document.getElementById("mainContent");
   switch (view) {
-    case 'dashboard': renderDashboard(main); break;
-    case 'materials': renderMaterials(main); break;
-    case 'drafts': renderDrafts(main); break;
-    case 'review': renderReview(main); break;
-    case 'records': renderRecords(main); break;
-    case 'characters': renderCharacters(main); break;
-    case 'users': renderUsers(main); break;
-    case 'logs': renderLogs(main); break;
-    case 'config': renderConfig(main); break;
+    case "dashboard": renderDashboard(main); break;
+    case "materials": renderMaterials(main); break;
+    case "drafts": renderDrafts(main); break;
+    case "review": renderReview(main); break;
+    case "records": renderRecords(main); break;
+    case "characters": renderCharacters(main); break;
+    case "users": renderUsers(main); break;
+    case "logs": renderLogs(main); break;
+    case "config": renderConfig(main); break;
   }
 }
 
 // ===================== 模态框 =====================
 function showModal(title, bodyHtml, onSave) {
-  document.getElementById('modalContent').innerHTML = `
+  document.getElementById("modalContent").innerHTML = `
     <h2>${title}</h2>
     <div class="modal-body">${bodyHtml}</div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">取消</button>
-      ${onSave ? '<button class="btn btn-primary" id="modalSaveBtn">保存</button>' : ''}
+      ${onSave ? "<button class=\"btn btn-primary\" id=\"modalSaveBtn\">保存</button>" : ""}
     </div>
   `;
-  document.getElementById('modalOverlay').style.display = 'flex';
+  document.getElementById("modalOverlay").style.display = "flex";
   if (onSave) {
-    document.getElementById('modalSaveBtn').addEventListener('click', async () => {
-      try { await onSave(); closeModal(); } catch (err) { toast(err.message, 'error'); }
+    document.getElementById("modalSaveBtn").addEventListener("click", async () => {
+      try { await onSave(); closeModal(); } catch (err) { toast(err.message, "error"); }
     });
   }
 }
 
 function closeModal() {
-  document.getElementById('modalOverlay').style.display = 'none';
+  document.getElementById("modalOverlay").style.display = "none";
 }
 
 function formValue(id) {
   const el = document.getElementById(id);
-  return el ? el.value : '';
+  return el ? el.value : "";
 }
 
 // ===================== 异步加载指示 =====================
 async function updateReviewBadge() {
   try {
-    const data = await api('/records?status=pending_review');
-    const badge = document.getElementById('reviewBadge');
+    const data = await api("/records?status=pending_review");
+    const badge = document.getElementById("reviewBadge");
     if (badge && data.length > 0) badge.textContent = data.length;
-    else if (badge) badge.style.display = 'none';
-  } catch {}
+    else if (badge) badge.style.display = "none";
+  } catch { /* 暂无待审核 */ }
 }
 
 // ===================== 视图：工作台 =====================
 async function renderDashboard(main) {
-  main.innerHTML = '<h1>📊 工作台</h1><p class="subtitle">编纂委员会管理系统</p>';
+  main.innerHTML = "<h1>📊 工作台</h1><p class=\"subtitle\">编纂委员会管理系统</p>";
   try {
-    const records = await api('/records');
-    const approvedCount = records.filter(r => r.status === 'approved').length;
-    const pendingCount = records.filter(r => r.status === 'pending_review').length;
-    const draftCount = records.filter(r => r.status === 'draft').length;
+    const records = await api("/records");
+    const approvedCount = records.filter(r => r.status === "approved").length;
+    const pendingCount = records.filter(r => r.status === "pending_review").length;
+    const draftCount = records.filter(r => r.status === "draft").length;
 
     main.innerHTML += `
       <div class="stats-grid">
@@ -219,9 +219,9 @@ async function renderDashboard(main) {
       <div class="card">
         <h3>📋 快捷操作</h3>
         <div class="btn-group" style="margin-top:12px">
-          ${isAtLeast('DraftWriter') ? '<button class="btn btn-primary" onclick="navigate(\'drafts\');showCreateDraftModal()">✍️ 撰写新史事</button>' : ''}
-          ${isAtLeast('MaterialCollector') ? '<button class="btn btn-success" onclick="navigate(\'materials\');showCreateMaterialModal()">📁 上传素材</button>' : ''}
-          ${isAtLeast('Reviewer') ? '<button class="btn btn-warning" onclick="navigate(\'review\')">🔍 审核稿件</button>' : ''}
+          ${isAtLeast("DraftWriter") ? "<button class=\"btn btn-primary\" onclick=\"navigate('drafts');showCreateDraftModal()\">✍️ 撰写新史事</button>" : ""}
+          ${isAtLeast("MaterialCollector") ? "<button class=\"btn btn-success\" onclick=\"navigate('materials');showCreateMaterialModal()\">📁 上传素材</button>" : ""}
+          ${isAtLeast("Reviewer") ? "<button class=\"btn btn-warning\" onclick=\"navigate('review')\">🔍 审核稿件</button>" : ""}
         </div>
       </div>
     `;
@@ -232,26 +232,26 @@ async function renderDashboard(main) {
 
 // ===================== 视图：素材资料 =====================
 async function renderMaterials(main) {
-  const isMaterialCollector = currentUser.role === 'MaterialCollector';
+  const isMaterialCollector = currentUser.role === "MaterialCollector";
   main.innerHTML = `<h1>📁 素材资料</h1>
-    <p class="subtitle">${isAtLeast('DraftWriter') ? '查看所有参考资料' : isMaterialCollector ? '整理用户投稿，标记已采用供执笔委员使用' : '管理已提交的素材'}</p>
-    ${isMaterialCollector ? '<div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>' : ''}
+    <p class="subtitle">${isAtLeast("DraftWriter") ? "查看所有参考资料" : isMaterialCollector ? "整理用户投稿，标记已采用供执笔委员使用" : "管理已提交的素材"}</p>
+    ${isMaterialCollector ? "<div class=\"card\" style=\"padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)\">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>" : ""}
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateMaterialModal()">📤 上传新素材</button>
-      ${isMaterialCollector ? '<select id="matStatusFilter" onchange="renderMaterials(document.getElementById(\'mainContent\'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)"><option value="">全部状态</option><option value="submitted">待整理</option><option value="organized">已整理</option><option value="in_use">已采用</option><option value="archived">已归档</option></select>' : ''}
+      ${isMaterialCollector ? "<select id=\"matStatusFilter\" onchange=\"renderMaterials(document.getElementById('mainContent'))\" style=\"margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)\"><option value=\"\">全部状态</option><option value=\"submitted\">待整理</option><option value=\"organized\">已整理</option><option value=\"in_use\">已采用</option><option value=\"archived\">已归档</option></select>" : ""}
     </div>
     <div id="materialsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    let url = '/materials';
+    let url = "/materials";
     if (isMaterialCollector) {
-      const filterStatus = document.getElementById('matStatusFilter')?.value || '';
-      if (filterStatus) url += '?status=' + filterStatus;
+      const filterStatus = document.getElementById("matStatusFilter")?.value || "";
+      if (filterStatus) url += "?status=" + filterStatus;
     }
     const materials = await api(url);
-    const container = document.getElementById('materialsList');
+    const container = document.getElementById("materialsList");
     if (materials.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无素材资料</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">📭</div><p>暂无素材资料</p></div>";
       return;
     }
     container.innerHTML = `
@@ -261,71 +261,71 @@ async function renderMaterials(main) {
           <tr>
             <td><strong>${escHtml(m.title)}</strong></td>
             <td>${typeIcon(m.material_type)}</td>
-            <td>${escHtml(m.submitter_name || '')}</td>
+            <td>${escHtml(m.submitter_name || "")}</td>
             <td>${matStatusBadge(m.status)}</td>
             <td>${fmtDate(m.created_at)}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewMaterial(${m.id})">查看</button>
-                ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>` : ''}
-                ${isMaterialCollector && m.status === 'submitted' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialOrganized(${m.id})">📋 已整理确认</button>` : ''}
-                ${isMaterialCollector && m.status === 'organized' ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ''}
-                ${isMaterialCollector && m.status === 'in_use' ? `<button class="btn btn-sm" style="background:var(--admin-muted);color:#fff" onclick="markMaterialArchived(${m.id})">📦 归档</button>` : ''}
-                ${canDeleteMaterial(m) ? `<button class="btn btn-sm btn-danger" onclick="deleteMaterial(${m.id})">删除</button>` : ''}
+                ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>` : ""}
+                ${isMaterialCollector && m.status === "submitted" ? `<button class="btn btn-sm btn-warning" onclick="markMaterialOrganized(${m.id})">📋 已整理确认</button>` : ""}
+                ${isMaterialCollector && m.status === "organized" ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ""}
+                ${isMaterialCollector && m.status === "in_use" ? `<button class="btn btn-sm" style="background:var(--admin-muted);color:#fff" onclick="markMaterialArchived(${m.id})">📦 归档</button>` : ""}
+                ${canDeleteMaterial(m) ? `<button class="btn btn-sm btn-danger" onclick="deleteMaterial(${m.id})">删除</button>` : ""}
               </div>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('materialsList').innerHTML =
+    document.getElementById("materialsList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 function canEditMaterial(m) {
-  if (isAtLeast('SupervisorGeneral')) return true;
-  if (isAtLeast('MaterialCollector')) return true;
+  if (isAtLeast("SupervisorGeneral")) return true;
+  if (isAtLeast("MaterialCollector")) return true;
   return false;
 }
 
 function canDeleteMaterial(m) {
-  if (isAtLeast('SupervisorGeneral')) return true;
+  if (isAtLeast("SupervisorGeneral")) return true;
   if (m.submitter_id === currentUser.id) return true;
   return false;
 }
 
 function matStatusBadge(s) {
-  const map = { 'submitted': ['待整理', 'status-pending_review'], 'organized': ['已整理', 'status-pending_review'], 'in_use': ['已采用', 'status-approved'], 'archived': ['已归档', 'status-draft'] };
-  const [label, cls] = map[s] || [s, 'status-draft'];
+  const map = { "submitted": ["待整理", "status-pending_review"], "organized": ["已整理", "status-pending_review"], "in_use": ["已采用", "status-approved"], "archived": ["已归档", "status-draft"] };
+  const [label, cls] = map[s] || [s, "status-draft"];
   return `<span class="status-badge ${cls}">${label}</span>`;
 }
 
 async function markMaterialOrganized(id) {
   try {
-    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'organized' }) });
-    toast('已确认整理，可标记为采用', 'success');
-    renderMaterials(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/materials/${id}`, { method: "PUT", body: JSON.stringify({ status: "organized" }) });
+    toast("已确认整理，可标记为采用", "success");
+    renderMaterials(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 async function markMaterialInUse(id) {
   try {
-    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'in_use' }) });
-    toast('已标记为采用，执笔委员可查看', 'success');
-    renderMaterials(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/materials/${id}`, { method: "PUT", body: JSON.stringify({ status: "in_use" }) });
+    toast("已标记为采用，执笔委员可查看", "success");
+    renderMaterials(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 async function markMaterialArchived(id) {
   try {
-    await api(`/materials/${id}`, { method: 'PUT', body: JSON.stringify({ status: 'archived' }) });
-    toast('已归档', 'success');
-    renderMaterials(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/materials/${id}`, { method: "PUT", body: JSON.stringify({ status: "archived" }) });
+    toast("已归档", "success");
+    renderMaterials(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 function showCreateMaterialModal() {
-  showModal('上传新素材', `
+  showModal("上传新素材", `
     <div class="form-group"><label>标题 *</label><input id="matTitle" placeholder="素材标题" /></div>
     <div class="form-group"><label>类型</label>
       <select id="matType"><option value="text">文字资料</option><option value="image">图片资料</option><option value="file">档案文件</option></select>
@@ -334,62 +334,62 @@ function showCreateMaterialModal() {
     <div class="form-group"><label>文件链接</label><input id="matFileUrl" placeholder="图片或文件的 URL 地址" /></div>
   `, async () => {
     const body = {
-      title: formValue('matTitle'),
-      materialType: formValue('matType'),
-      content: formValue('matContent'),
-      fileUrl: formValue('matFileUrl'),
+      title: formValue("matTitle"),
+      materialType: formValue("matType"),
+      content: formValue("matContent"),
+      fileUrl: formValue("matFileUrl"),
     };
-    if (!body.title) throw new Error('标题为必填项');
-    await api('/materials', { method: 'POST', body: JSON.stringify(body) });
-    toast('素材上传成功', 'success');
-    renderMaterials(document.getElementById('mainContent'));
+    if (!body.title) throw new Error("标题为必填项");
+    await api("/materials", { method: "POST", body: JSON.stringify(body) });
+    toast("素材上传成功", "success");
+    renderMaterials(document.getElementById("mainContent"));
   });
 }
 
 async function viewMaterial(id) {
-  const materials = await api('/materials');
+  const materials = await api("/materials");
   const m = materials.find(x => x.id === id);
   if (!m) return;
   showModal(`查看素材: ${m.title}`, `
     <div class="form-group"><label>标题</label><p>${escHtml(m.title)}</p></div>
     <div class="form-group"><label>类型</label><p>${typeIcon(m.material_type)}</p></div>
     <div class="form-group"><label>内容</label><div style="white-space:pre-wrap;background:var(--admin-bg);padding:12px;border-radius:6px">${escHtml(m.content)}</div></div>
-    ${m.file_url ? `<div class="form-group"><label>文件链接</label><p><a href="${escHtml(m.file_url)}" target="_blank" style="color:var(--admin-primary-hover)">${escHtml(m.file_url)}</a></p></div>` : ''}
-    <div class="form-group"><label>提交者</label><p>${escHtml(m.submitter_name || '')} · ${fmtDate(m.created_at)}</p></div>
+    ${m.file_url ? `<div class="form-group"><label>文件链接</label><p><a href="${escHtml(m.file_url)}" target="_blank" style="color:var(--admin-primary-hover)">${escHtml(m.file_url)}</a></p></div>` : ""}
+    <div class="form-group"><label>提交者</label><p>${escHtml(m.submitter_name || "")} · ${fmtDate(m.created_at)}</p></div>
   `);
 }
 
 async function editMaterial(id) {
-  const materials = await api('/materials');
+  const materials = await api("/materials");
   const m = materials.find(x => x.id === id);
   if (!m) return;
-  showModal('编辑素材', `
+  showModal("编辑素材", `
     <div class="form-group"><label>标题</label><input id="matTitle" value="${escAttr(m.title)}" /></div>
     <div class="form-group"><label>类型</label>
-      <select id="matType">${['text','image','file'].map(t => `<option value="${t}" ${m.material_type === t ? 'selected' : ''}>${t === 'text' ? '文字资料' : t === 'image' ? '图片资料' : '档案文件'}</option>`).join('')}</select>
+      <select id="matType">${["text","image","file"].map(t => `<option value="${t}" ${m.material_type === t ? "selected" : ""}>${t === "text" ? "文字资料" : t === "image" ? "图片资料" : "档案文件"}</option>`).join("")}</select>
     </div>
     <div class="form-group"><label>内容</label><textarea id="matContent">${escHtml(m.content)}</textarea></div>
-    <div class="form-group"><label>文件链接</label><input id="matFileUrl" value="${escAttr(m.file_url || '')}" /></div>
+    <div class="form-group"><label>文件链接</label><input id="matFileUrl" value="${escAttr(m.file_url || "")}" /></div>
   `, async () => {
     await api(`/materials/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({
-        title: formValue('matTitle'), materialType: formValue('matType'),
-        content: formValue('matContent'), fileUrl: formValue('matFileUrl'),
+        title: formValue("matTitle"), materialType: formValue("matType"),
+        content: formValue("matContent"), fileUrl: formValue("matFileUrl"),
       }),
     });
-    toast('素材修改成功', 'success');
-    renderMaterials(document.getElementById('mainContent'));
+    toast("素材修改成功", "success");
+    renderMaterials(document.getElementById("mainContent"));
   });
 }
 
 async function deleteMaterial(id) {
-  if (!confirm('确认删除此素材？此操作不可撤销。')) return;
+  if (!confirm("确认删除此素材？此操作不可撤销。")) return;
   try {
-    await api(`/materials/${id}`, { method: 'DELETE' });
-    toast('素材已删除', 'success');
-    renderMaterials(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/materials/${id}`, { method: "DELETE" });
+    toast("素材已删除", "success");
+    renderMaterials(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 // ===================== 视图：史事稿件（DraftWriter） =====================
@@ -397,7 +397,7 @@ async function renderDrafts(main) {
   main.innerHTML = `<h1>✍️ 史事稿件</h1><p class="subtitle">撰写和管理史事内容</p>
     <div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">
       📋 <strong>工作流</strong>：新建稿件 → 编辑内容 → <span style="color:#f59e0b">提交审核</span> → 审定委员审核 → <span style="color:#22c55e">通过发布</span> / <span style="color:#ef4444">驳回修改</span>
-      ${currentUser.role === 'DraftWriter' ? '<br>💡 提示：写完稿件后别忘了点 <span style=\"color:#f59e0b\">提交审核</span>，否则审定委员看不到！' : ''}
+      ${currentUser.role === "DraftWriter" ? "<br>💡 提示：写完稿件后别忘了点 <span style=\"color:#f59e0b\">提交审核</span>，否则审定委员看不到！" : ""}
     </div>
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateDraftModal()">✍️ 新建稿件</button>
@@ -412,26 +412,26 @@ async function renderDrafts(main) {
     <div id="draftsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const filterStatus = document.getElementById('draftStatusFilter')?.value || '';
-    let url = '/records';
+    const filterStatus = document.getElementById("draftStatusFilter")?.value || "";
+    let url = "/records";
     const params = [];
     if (filterStatus) params.push(`status=${filterStatus}`);
     // DraftWriter 看到自己的草稿+所有非草稿
-    if (currentUser.role === 'DraftWriter' && !filterStatus) {
+    if (currentUser.role === "DraftWriter" && !filterStatus) {
       // 默认看自己的所有稿件
     }
-    if (params.length) url += '?' + params.join('&');
+    if (params.length) url += "?" + params.join("&");
 
     const records = await api(url);
     let filtered = records;
     // DraftWriter 默认只显示自己的草稿 + 所有已审核
-    if (currentUser.role === 'DraftWriter' && !filterStatus) {
-      filtered = records.filter(r => r.author_id === currentUser.id || r.status === 'approved');
+    if (currentUser.role === "DraftWriter" && !filterStatus) {
+      filtered = records.filter(r => r.author_id === currentUser.id || r.status === "approved");
     }
 
-    const container = document.getElementById('draftsList');
+    const container = document.getElementById("draftsList");
     if (filtered.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">📝</div><p>暂无稿件</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">📝</div><p>暂无稿件</p></div>";
       return;
     }
     container.innerHTML = `
@@ -443,37 +443,37 @@ async function renderDrafts(main) {
             <td>${escHtml(r.grade)}</td>
             <td>${typeLabel(r.type)}</td>
             <td>${statusBadge(r.status)}</td>
-            <td>${escHtml(r.author_name || '')}</td>
+            <td>${escHtml(r.author_name || "")}</td>
             <td>${fmtDate(r.date || r.created_at)}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewDraft(${r.id})">查看</button>
-                ${canEditDraft(r) ? `<button class="btn btn-sm btn-success" onclick="editDraft(${r.id})">编辑</button>` : ''}
-                ${canSubmitReview(r) ? `<button class="btn btn-sm btn-warning" onclick="submitReview(${r.id})">提交审核</button>` : ''}
-                ${isAtLeast('SupervisorGeneral') ? `<button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">删除</button>` : ''}
+                ${canEditDraft(r) ? `<button class="btn btn-sm btn-success" onclick="editDraft(${r.id})">编辑</button>` : ""}
+                ${canSubmitReview(r) ? `<button class="btn btn-sm btn-warning" onclick="submitReview(${r.id})">提交审核</button>` : ""}
+                ${isAtLeast("SupervisorGeneral") ? `<button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">删除</button>` : ""}
               </div>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('draftsList').innerHTML =
+    document.getElementById("draftsList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 function canEditDraft(r) {
-  if (isAtLeast('SupervisorGeneral')) return true;
-  if (r.author_id === currentUser.id && (r.status === 'draft' || r.status === 'rejected')) return true;
+  if (isAtLeast("SupervisorGeneral")) return true;
+  if (r.author_id === currentUser.id && (r.status === "draft" || r.status === "rejected")) return true;
   return false;
 }
 
 function canSubmitReview(r) {
-  return isAtLeast('DraftWriter') && r.author_id === currentUser.id &&
-    (r.status === 'draft' || r.status === 'rejected');
+  return isAtLeast("DraftWriter") && r.author_id === currentUser.id &&
+    (r.status === "draft" || r.status === "rejected");
 }
 
 function showCreateDraftModal() {
-  showModal('新建史事稿件', `
+  showModal("新建史事稿件", `
     <div class="form-group"><label>标题 *</label><input id="draftTitle" placeholder="史事标题" /></div>
     <div class="form-group"><label>学期 *</label>
       <select id="draftGrade">
@@ -497,57 +497,57 @@ function showCreateDraftModal() {
     </div>
   `, async () => {
     const body = {
-      title: formValue('draftTitle'), grade: formValue('draftGrade'),
-      type: formValue('draftType'), date: formValue('draftDate'),
-      content: formValue('draftContent'), honorific: formValue('draftHonorific'),
-      notes: formValue('draftNotes'),
+      title: formValue("draftTitle"), grade: formValue("draftGrade"),
+      type: formValue("draftType"), date: formValue("draftDate"),
+      content: formValue("draftContent"), honorific: formValue("draftHonorific"),
+      notes: formValue("draftNotes"),
     };
-    if (!body.title || !body.grade) throw new Error('标题和学期为必填项');
+    if (!body.title || !body.grade) throw new Error("标题和学期为必填项");
     // 勾选了"创建后直接提交审核" → 直接以 pending_review 状态创建，跳过草稿阶段喵
-    if (document.getElementById('draftAutoSubmit').checked) {
-      body.status = 'pending_review';
+    if (document.getElementById("draftAutoSubmit").checked) {
+      body.status = "pending_review";
     }
-    const result = await api('/records', { method: 'POST', body: JSON.stringify(body) });
-    if (body.status === 'pending_review') {
-      toast('稿件已创建并提交审核', 'success');
+    const result = await api("/records", { method: "POST", body: JSON.stringify(body) });
+    if (body.status === "pending_review") {
+      toast("稿件已创建并提交审核", "success");
     } else {
-      toast('稿件创建成功（草稿状态），记得点「提交审核」', 'info');
+      toast("稿件创建成功（草稿状态），记得点「提交审核」", "info");
     }
-    renderDrafts(document.getElementById('mainContent'));
+    renderDrafts(document.getElementById("mainContent"));
     updateReviewBadge();
   });
 }
 
 async function viewDraft(id) {
-  const records = await api('/records');
+  const records = await api("/records");
   const r = records.find(x => x.id === id);
   if (!r) return;
   showModal(`史事: ${r.title}`, `
     <div style="margin-bottom:16px">${statusBadge(r.status)} <span style="color:var(--admin-muted);margin-left:8px">${escHtml(r.grade)} · ${typeLabel(r.type)} · ${fmtDate(r.date || r.created_at)}</span></div>
     <div class="form-group"><label>正文</label><div style="white-space:pre-wrap;background:var(--admin-bg);padding:16px;border-radius:6px;max-height:300px;overflow-y:auto">${escHtml(r.content)}</div></div>
-    ${r.honorific ? `<div class="form-group"><label>评语</label><p>${escHtml(r.honorific)}</p></div>` : ''}
-    ${r.notes ? `<div class="form-group"><label>注释</label><p>${escHtml(r.notes)}</p></div>` : ''}
-    ${r.review_comment ? `<div class="form-group"><label>审核意见</label><p style="color:${r.status==='rejected'?'var(--admin-danger)':'var(--admin-success)'}">${escHtml(r.review_comment)}</p></div>` : ''}
-    <div class="form-group"><label>作者</label><p>${escHtml(r.author_name || '')} · ${fmtDate(r.created_at)}</p></div>
+    ${r.honorific ? `<div class="form-group"><label>评语</label><p>${escHtml(r.honorific)}</p></div>` : ""}
+    ${r.notes ? `<div class="form-group"><label>注释</label><p>${escHtml(r.notes)}</p></div>` : ""}
+    ${r.review_comment ? `<div class="form-group"><label>审核意见</label><p style="color:${r.status==="rejected"?"var(--admin-danger)":"var(--admin-success)"}">${escHtml(r.review_comment)}</p></div>` : ""}
+    <div class="form-group"><label>作者</label><p>${escHtml(r.author_name || "")} · ${fmtDate(r.created_at)}</p></div>
   `);
 }
 
 async function editDraft(id) {
-  const records = await api('/records');
+  const records = await api("/records");
   const r = records.find(x => x.id === id);
   if (!r) return;
-  showModal('编辑稿件', `
+  showModal("编辑稿件", `
     <div class="form-group"><label>标题</label><input id="draftTitle" value="${escAttr(r.title)}" /></div>
     <div class="form-group"><label>学期</label>
-      <select id="draftGrade">${['七上','七下','八上','八下','九上','九下'].map(g => `<option value="${g}" ${r.grade===g?'selected':''}>${g}</option>`).join('')}</select>
+      <select id="draftGrade">${["七上","七下","八上","八下","九上","九下"].map(g => `<option value="${g}" ${r.grade===g?"selected":""}>${g}</option>`).join("")}</select>
     </div>
     <div class="form-group"><label>类型</label>
-      <select id="draftType">${['zhengshi','waishi','xishi'].map(t => `<option value="${t}" ${r.type===t?'selected':''}>${typeLabel(t)}</option>`).join('')}</select>
+      <select id="draftType">${["zhengshi","waishi","xishi"].map(t => `<option value="${t}" ${r.type===t?"selected":""}>${typeLabel(t)}</option>`).join("")}</select>
     </div>
-    <div class="form-group"><label>日期</label><input id="draftDate" type="date" value="${r.date || ''}" /></div>
+    <div class="form-group"><label>日期</label><input id="draftDate" type="date" value="${r.date || ""}" /></div>
     <div class="form-group"><label>正文</label><textarea id="draftContent" style="min-height:200px">${escHtml(r.content)}</textarea></div>
-    <div class="form-group"><label>评语</label><input id="draftHonorific" value="${escAttr(r.honorific || '')}" /></div>
-    <div class="form-group"><label>注释</label><input id="draftNotes" value="${escAttr(r.notes || '')}" /></div>
+    <div class="form-group"><label>评语</label><input id="draftHonorific" value="${escAttr(r.honorific || "")}" /></div>
+    <div class="form-group"><label>注释</label><input id="draftNotes" value="${escAttr(r.notes || "")}" /></div>
     <div class="form-group" style="margin-top:8px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#f59e0b">
         <input type="checkbox" id="draftAutoSubmit" style="width:auto;accent-color:#f59e0b" />
@@ -556,27 +556,27 @@ async function editDraft(id) {
     </div>
   `, async () => {
     const body = {
-      title: formValue('draftTitle'), grade: formValue('draftGrade'),
-      type: formValue('draftType'), date: formValue('draftDate'),
-      content: formValue('draftContent'), honorific: formValue('draftHonorific'),
-      notes: formValue('draftNotes'),
+      title: formValue("draftTitle"), grade: formValue("draftGrade"),
+      type: formValue("draftType"), date: formValue("draftDate"),
+      content: formValue("draftContent"), honorific: formValue("draftHonorific"),
+      notes: formValue("draftNotes"),
     };
-    if (document.getElementById('draftAutoSubmit').checked) {
-      body.status = 'pending_review';
+    if (document.getElementById("draftAutoSubmit").checked) {
+      body.status = "pending_review";
     }
-    await api(`/records/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    toast(body.status === 'pending_review' ? '稿件已保存并提交审核' : '稿件已更新', 'success');
-    renderDrafts(document.getElementById('mainContent'));
+    await api(`/records/${id}`, { method: "PUT", body: JSON.stringify(body) });
+    toast(body.status === "pending_review" ? "稿件已保存并提交审核" : "稿件已更新", "success");
+    renderDrafts(document.getElementById("mainContent"));
   });
 }
 
 async function submitReview(id) {
-  if (!confirm('确认提交审核？提交后将无法编辑。')) return;
+  if (!confirm("确认提交审核？提交后将无法编辑。")) return;
   try {
-    await api(`/records/${id}/submit-review`, { method: 'POST' });
-    toast('已提交审核', 'success');
-    renderDrafts(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/records/${id}/submit-review`, { method: "POST" });
+    toast("已提交审核", "success");
+    renderDrafts(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 // ===================== 视图：待审稿件（Reviewer） =====================
@@ -585,26 +585,26 @@ async function renderReview(main) {
     <div id="reviewList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const records = await api('/records?status=pending_review');
-    const container = document.getElementById('reviewList');
+    const records = await api("/records?status=pending_review");
+    const container = document.getElementById("reviewList");
     if (records.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>暂无待审核稿件</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">✅</div><p>暂无待审核稿件</p></div>";
       return;
     }
     container.innerHTML = records.map(r => `
       <div class="card">
         <h3>${escHtml(r.title)} <span style="font-size:12px;color:var(--admin-muted);font-weight:normal">${escHtml(r.grade)} · ${typeLabel(r.type)}</span></h3>
         <div style="white-space:pre-wrap;background:var(--admin-bg);padding:16px;border-radius:6px;margin:12px 0;max-height:200px;overflow-y:auto">${escHtml(r.content)}</div>
-        ${r.honorific ? `<p style="color:var(--admin-muted)">${escHtml(r.honorific)}</p>` : ''}
-        <p style="font-size:12px;color:var(--admin-muted);margin-top:8px">作者: ${escHtml(r.author_name || '')} · ${fmtDate(r.created_at)}</p>
+        ${r.honorific ? `<p style="color:var(--admin-muted)">${escHtml(r.honorific)}</p>` : ""}
+        <p style="font-size:12px;color:var(--admin-muted);margin-top:8px">作者: ${escHtml(r.author_name || "")} · ${fmtDate(r.created_at)}</p>
         <div class="btn-group" style="margin-top:12px">
           <button class="btn btn-success" onclick="approveRecord(${r.id})">✅ 通过</button>
           <button class="btn btn-danger" onclick="showRejectModal(${r.id})">❌ 驳回</button>
         </div>
       </div>
-    `).join('');
+    `).join("");
   } catch (err) {
-    document.getElementById('reviewList').innerHTML =
+    document.getElementById("reviewList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
@@ -612,27 +612,27 @@ async function renderReview(main) {
 async function approveRecord(id) {
   try {
     await api(`/records/${id}/review`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'approve', comment: '审核通过' }),
+      method: "POST",
+      body: JSON.stringify({ action: "approve", comment: "审核通过" }),
     });
-    toast('审核通过，已自动发布', 'success');
-    renderReview(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    toast("审核通过，已自动发布", "success");
+    renderReview(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 function showRejectModal(id) {
-  showModal('驳回稿件', `
+  showModal("驳回稿件", `
     <p style="margin-bottom:12px;color:var(--admin-muted)">请填写驳回理由，稿件将退回执笔委员修改。</p>
     <textarea id="rejectComment" class="review-comment" placeholder="驳回理由（必填）..." rows="4"></textarea>
   `, async () => {
-    const comment = formValue('rejectComment');
-    if (!comment.trim()) throw new Error('请填写驳回理由');
+    const comment = formValue("rejectComment");
+    if (!comment.trim()) throw new Error("请填写驳回理由");
     await api(`/records/${id}/review`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'reject', comment }),
+      method: "POST",
+      body: JSON.stringify({ action: "reject", comment }),
     });
-    toast('已驳回，稿件退回执笔委员', 'success');
-    renderReview(document.getElementById('mainContent'));
+    toast("已驳回，稿件退回执笔委员", "success");
+    renderReview(document.getElementById("mainContent"));
   });
 }
 
@@ -642,10 +642,10 @@ async function renderRecords(main) {
     <div id="recordsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const records = await api('/records');
-    const container = document.getElementById('recordsList');
+    const records = await api("/records");
+    const container = document.getElementById("recordsList");
     if (records.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无史事</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">📭</div><p>暂无史事</p></div>";
       return;
     }
     container.innerHTML = `
@@ -658,7 +658,7 @@ async function renderRecords(main) {
             <td>${escHtml(r.grade)}</td>
             <td>${typeLabel(r.type)}</td>
             <td>${statusBadge(r.status)}</td>
-            <td>${escHtml(r.author_name || '')}</td>
+            <td>${escHtml(r.author_name || "")}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewDraft(${r.id})">查看</button>
@@ -666,21 +666,21 @@ async function renderRecords(main) {
                 <button class="btn btn-sm btn-danger" onclick="deleteRecord(${r.id})">删除</button>
               </div>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('recordsList').innerHTML =
+    document.getElementById("recordsList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 async function deleteRecord(id) {
-  if (!confirm('确认删除此史事？此操作不可撤销。')) return;
+  if (!confirm("确认删除此史事？此操作不可撤销。")) return;
   try {
-    await api(`/records/${id}`, { method: 'DELETE' });
-    toast('史事已删除', 'success');
-    renderRecords(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/records/${id}`, { method: "DELETE" });
+    toast("史事已删除", "success");
+    renderRecords(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 // ===================== 视图：人物管理 =====================
@@ -692,10 +692,10 @@ async function renderCharacters(main) {
     <div id="charList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const chars = await api('/characters');
-    const container = document.getElementById('charList');
+    const chars = await api("/characters");
+    const container = document.getElementById("charList");
     if (chars.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>暂无人物档案</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">👤</div><p>暂无人物档案</p></div>";
       return;
     }
     container.innerHTML = `
@@ -704,26 +704,26 @@ async function renderCharacters(main) {
         <tbody>${chars.map(c => `
           <tr>
             <td><strong>${escHtml(c.name)}</strong></td>
-            <td>${escHtml((c.nicknames || []).join(' · '))}</td>
-            <td>${escHtml(c.gender || '')}</td>
-            <td>${escHtml(String(c.firstAge || c.first_age || ''))}</td>
+            <td>${escHtml((c.nicknames || []).join(" · "))}</td>
+            <td>${escHtml(c.gender || "")}</td>
+            <td>${escHtml(String(c.firstAge || c.first_age || ""))}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewChar(${c.id})">查看</button>
                 <button class="btn btn-sm btn-success" onclick="editChar(${c.id})">编辑</button>
-                ${isAtLeast('SupervisorGeneral') ? `<button class="btn btn-sm btn-danger" onclick="deleteChar(${c.id})">删除</button>` : ''}
+                ${isAtLeast("SupervisorGeneral") ? `<button class="btn btn-sm btn-danger" onclick="deleteChar(${c.id})">删除</button>` : ""}
               </div>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('charList').innerHTML =
+    document.getElementById("charList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 function showCreateCharModal() {
-  showModal('添加人物', `
+  showModal("添加人物", `
     <div class="form-group"><label>姓名 *</label><input id="charName" placeholder="人物姓名" /></div>
     <div class="form-group"><label>别号（逗号分隔）</label><input id="charNicks" placeholder="如：屎高祖, 屎皇帝" /></div>
     <div class="form-group"><label>性别</label><select id="charGender"><option value="">不详</option><option value="男">男</option><option value="女">女</option></select></div>
@@ -731,69 +731,69 @@ function showCreateCharModal() {
     <div class="form-group"><label>特征</label><input id="charTraits" placeholder="如：带眼镜、调皮" /></div>
     <div class="form-group"><label>描述</label><textarea id="charDesc" placeholder="人物详情描述"></textarea></div>
   `, async () => {
-    const nicknames = formValue('charNicks').split(/[,，、]/).map(s => s.trim()).filter(Boolean);
-    await api('/characters', {
-      method: 'POST',
+    const nicknames = formValue("charNicks").split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+    await api("/characters", {
+      method: "POST",
       body: JSON.stringify({
-        name: formValue('charName'), nicknames,
-        gender: formValue('charGender'), firstAge: formValue('charAge'),
-        traits: formValue('charTraits'), desc: formValue('charDesc'),
+        name: formValue("charName"), nicknames,
+        gender: formValue("charGender"), firstAge: formValue("charAge"),
+        traits: formValue("charTraits"), desc: formValue("charDesc"),
       }),
     });
-    toast('人物已添加', 'success');
-    renderCharacters(document.getElementById('mainContent'));
+    toast("人物已添加", "success");
+    renderCharacters(document.getElementById("mainContent"));
   });
 }
 
 async function viewChar(id) {
-  const chars = await api('/characters');
+  const chars = await api("/characters");
   const c = chars.find(x => x.id === id);
   if (!c) return;
-  const nicks = (c.nicknames || []).join(' · ');
+  const nicks = (c.nicknames || []).join(" · ");
   showModal(`人物: ${c.name}`, `
     <div class="form-group"><label>姓名</label><p>${escHtml(c.name)}</p></div>
-    ${nicks ? `<div class="form-group"><label>别号</label><p>🏷️ ${escHtml(nicks)}</p></div>` : ''}
-    <div class="form-group"><label>性别</label><p>${escHtml(c.gender || '不详')}</p></div>
-    <div class="form-group"><label>初龄</label><p>${escHtml(String(c.firstAge || c.first_age || '不详'))}</p></div>
-    ${c.traits ? `<div class="form-group"><label>特征</label><p>${escHtml(c.traits)}</p></div>` : ''}
-    <div class="form-group"><label>描述</label><div style="white-space:pre-wrap;background:var(--admin-bg);padding:12px;border-radius:6px">${escHtml(c.desc || c.description || '')}</div></div>
+    ${nicks ? `<div class="form-group"><label>别号</label><p>🏷️ ${escHtml(nicks)}</p></div>` : ""}
+    <div class="form-group"><label>性别</label><p>${escHtml(c.gender || "不详")}</p></div>
+    <div class="form-group"><label>初龄</label><p>${escHtml(String(c.firstAge || c.first_age || "不详"))}</p></div>
+    ${c.traits ? `<div class="form-group"><label>特征</label><p>${escHtml(c.traits)}</p></div>` : ""}
+    <div class="form-group"><label>描述</label><div style="white-space:pre-wrap;background:var(--admin-bg);padding:12px;border-radius:6px">${escHtml(c.desc || c.description || "")}</div></div>
   `);
 }
 
 async function editChar(id) {
-  const chars = await api('/characters');
+  const chars = await api("/characters");
   const c = chars.find(x => x.id === id);
   if (!c) return;
-  const nicks = (c.nicknames || []).join(', ');
-  showModal('编辑人物', `
+  const nicks = (c.nicknames || []).join(", ");
+  showModal("编辑人物", `
     <div class="form-group"><label>姓名</label><input id="charName" value="${escAttr(c.name)}" /></div>
     <div class="form-group"><label>别号（逗号分隔）</label><input id="charNicks" value="${escAttr(nicks)}" /></div>
-    <div class="form-group"><label>性别</label><select id="charGender">${['', '男', '女'].map(g => `<option value="${g}" ${(c.gender||'')===g?'selected':''}>${g||'不详'}</option>`).join('')}</select></div>
-    <div class="form-group"><label>初龄</label><input id="charAge" value="${escAttr(String(c.firstAge || c.first_age || ''))}" /></div>
-    <div class="form-group"><label>特征</label><input id="charTraits" value="${escAttr(c.traits || '')}" /></div>
-    <div class="form-group"><label>描述</label><textarea id="charDesc" style="min-height:120px">${escHtml(c.desc || c.description || '')}</textarea></div>
+    <div class="form-group"><label>性别</label><select id="charGender">${["", "男", "女"].map(g => `<option value="${g}" ${(c.gender||"")===g?"selected":""}>${g||"不详"}</option>`).join("")}</select></div>
+    <div class="form-group"><label>初龄</label><input id="charAge" value="${escAttr(String(c.firstAge || c.first_age || ""))}" /></div>
+    <div class="form-group"><label>特征</label><input id="charTraits" value="${escAttr(c.traits || "")}" /></div>
+    <div class="form-group"><label>描述</label><textarea id="charDesc" style="min-height:120px">${escHtml(c.desc || c.description || "")}</textarea></div>
   `, async () => {
-    const nicknames = formValue('charNicks').split(/[,，、]/).map(s => s.trim()).filter(Boolean);
+    const nicknames = formValue("charNicks").split(/[,，、]/).map(s => s.trim()).filter(Boolean);
     await api(`/characters/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({
-        name: formValue('charName'), nicknames,
-        gender: formValue('charGender'), firstAge: formValue('charAge'),
-        traits: formValue('charTraits'), desc: formValue('charDesc'),
+        name: formValue("charName"), nicknames,
+        gender: formValue("charGender"), firstAge: formValue("charAge"),
+        traits: formValue("charTraits"), desc: formValue("charDesc"),
       }),
     });
-    toast('人物已更新', 'success');
-    renderCharacters(document.getElementById('mainContent'));
+    toast("人物已更新", "success");
+    renderCharacters(document.getElementById("mainContent"));
   });
 }
 
 async function deleteChar(id) {
-  if (!confirm('确认删除此人物？')) return;
+  if (!confirm("确认删除此人物？")) return;
   try {
-    await api(`/characters/${id}`, { method: 'DELETE' });
-    toast('人物已删除', 'success');
-    renderCharacters(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/characters/${id}`, { method: "DELETE" });
+    toast("人物已删除", "success");
+    renderCharacters(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 // ===================== 视图：委员管理 =====================
@@ -805,8 +805,8 @@ async function renderUsers(main) {
     <div id="usersList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const users = await api('/users');
-    const container = document.getElementById('usersList');
+    const users = await api("/users");
+    const container = document.getElementById("usersList");
     container.innerHTML = `
       <table class="admin-table">
         <thead><tr><th>用户名</th><th>角色</th><th>注册时间</th><th>操作</th></tr></thead>
@@ -817,23 +817,23 @@ async function renderUsers(main) {
             <td>${fmtDate(u.created_at)}</td>
             <td>
               <div class="btn-group">
-                ${canManageUserRole(u) ? `<button class="btn btn-sm btn-success" onclick="showChangeRoleModal(${u.id}, '${escAttr(u.username)}', '${u.role}')">改角色</button>` : ''}
-                ${canDeleteUser(u) ? `<button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${escAttr(u.username)}')">删除</button>` : ''}
+                ${canManageUserRole(u) ? `<button class="btn btn-sm btn-success" onclick="showChangeRoleModal(${u.id}, '${escAttr(u.username)}', '${u.role}')">改角色</button>` : ""}
+                ${canDeleteUser(u) ? `<button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${escAttr(u.username)}')">删除</button>` : ""}
               </div>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('usersList').innerHTML =
+    document.getElementById("usersList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 function canManageUserRole(target) {
-  const levels = { 'user':0, 'MaterialCollector':1, 'DraftWriter':2, 'Reviewer':3, 'SupervisorGeneral':4, 'DeputySupervisor':4, 'Chairperson':5, 'ExecutiveDeputyChair':5 };
+  const levels = { "user":0, "MaterialCollector":1, "DraftWriter":2, "Reviewer":3, "SupervisorGeneral":4, "DeputySupervisor":4, "Chairperson":5, "ExecutiveDeputyChair":5 };
   if ((levels[currentUser.role] || 0) <= (levels[target.role] || 0)) return false;
-  if (currentUser.role === 'DeputySupervisor' && target.role === 'SupervisorGeneral') return false;
-  if (currentUser.role === 'ExecutiveDeputyChair' && target.role === 'Chairperson') return false;
+  if (currentUser.role === "DeputySupervisor" && target.role === "SupervisorGeneral") return false;
+  if (currentUser.role === "ExecutiveDeputyChair" && target.role === "Chairperson") return false;
   return true;
 }
 
@@ -842,56 +842,56 @@ function canDeleteUser(target) {
 }
 
 function showCreateUserModal() {
-  const manageableRoles = ['user', 'MaterialCollector', 'DraftWriter', 'Reviewer'];
-  if (isAtLeast('Chairperson')) manageableRoles.push('SupervisorGeneral', 'DeputySupervisor', 'ExecutiveDeputyChair');
-  else if (isAtLeast('SupervisorGeneral')) manageableRoles.push('SupervisorGeneral'); // 可以创建同级
+  const manageableRoles = ["user", "MaterialCollector", "DraftWriter", "Reviewer"];
+  if (isAtLeast("Chairperson")) manageableRoles.push("SupervisorGeneral", "DeputySupervisor", "ExecutiveDeputyChair");
+  else if (isAtLeast("SupervisorGeneral")) manageableRoles.push("SupervisorGeneral"); // 可以创建同级
 
-  showModal('添加委员', `
+  showModal("添加委员", `
     <div class="form-group"><label>用户名 *</label><input id="newUsername" placeholder="登录用户名" /></div>
     <div class="form-group"><label>密码 *</label><input id="newPassword" type="password" placeholder="至少6位" /></div>
     <div class="form-group"><label>角色</label>
-      <select id="newRole">${manageableRoles.map(r => `<option value="${r}">${roleLabel(r)}</option>`).join('')}</select>
+      <select id="newRole">${manageableRoles.map(r => `<option value="${r}">${roleLabel(r)}</option>`).join("")}</select>
     </div>
   `, async () => {
-    const username = formValue('newUsername');
-    const password = formValue('newPassword');
-    if (!username || !password) throw new Error('用户名和密码为必填项');
-    await api('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ username, password, role: formValue('newRole') }),
+    const username = formValue("newUsername");
+    const password = formValue("newPassword");
+    if (!username || !password) throw new Error("用户名和密码为必填项");
+    await api("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ username, password, role: formValue("newRole") }),
     });
-    toast('委员账号创建成功', 'success');
-    renderUsers(document.getElementById('mainContent'));
+    toast("委员账号创建成功", "success");
+    renderUsers(document.getElementById("mainContent"));
   });
 }
 
 function showChangeRoleModal(userId, username, currentRole) {
-  const manageableRoles = ['user', 'MaterialCollector', 'DraftWriter', 'Reviewer'];
-  if (isAtLeast('Chairperson')) manageableRoles.push('SupervisorGeneral', 'DeputySupervisor', 'ExecutiveDeputyChair');
-  else if (isAtLeast('SupervisorGeneral')) manageableRoles.push('DeputySupervisor');
+  const manageableRoles = ["user", "MaterialCollector", "DraftWriter", "Reviewer"];
+  if (isAtLeast("Chairperson")) manageableRoles.push("SupervisorGeneral", "DeputySupervisor", "ExecutiveDeputyChair");
+  else if (isAtLeast("SupervisorGeneral")) manageableRoles.push("DeputySupervisor");
 
   showModal(`修改角色: ${username}`, `
     <p style="color:var(--admin-muted);margin-bottom:16px">当前角色: ${roleLabel(currentRole)}</p>
     <div class="form-group"><label>新角色</label>
-      <select id="newRole">${manageableRoles.map(r => `<option value="${r}" ${r===currentRole?'selected':''}>${roleLabel(r)}</option>`).join('')}</select>
+      <select id="newRole">${manageableRoles.map(r => `<option value="${r}" ${r===currentRole?"selected":""}>${roleLabel(r)}</option>`).join("")}</select>
     </div>
   `, async () => {
     await api(`/users/${userId}/role`, {
-      method: 'PUT',
-      body: JSON.stringify({ role: formValue('newRole') }),
+      method: "PUT",
+      body: JSON.stringify({ role: formValue("newRole") }),
     });
-    toast(`角色更新成功`, 'success');
-    renderUsers(document.getElementById('mainContent'));
+    toast("角色更新成功", "success");
+    renderUsers(document.getElementById("mainContent"));
   });
 }
 
 async function deleteUser(userId, username) {
   if (!confirm(`确认删除委员「${username}」？此操作不可撤销。`)) return;
   try {
-    await api(`/users/${userId}`, { method: 'DELETE' });
-    toast(`已删除委员 ${username}`, 'success');
-    renderUsers(document.getElementById('mainContent'));
-  } catch (err) { toast(err.message, 'error'); }
+    await api(`/users/${userId}`, { method: "DELETE" });
+    toast(`已删除委员 ${username}`, "success");
+    renderUsers(document.getElementById("mainContent"));
+  } catch (err) { toast(err.message, "error"); }
 }
 
 // ===================== 视图：操作日志 =====================
@@ -900,10 +900,10 @@ async function renderLogs(main) {
     <div id="logsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const logs = await api('/logs?limit=200');
-    const container = document.getElementById('logsList');
+    const logs = await api("/logs?limit=200");
+    const container = document.getElementById("logsList");
     if (logs.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>暂无操作日志</p></div>';
+      container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">📋</div><p>暂无操作日志</p></div>";
       return;
     }
     container.innerHTML = `
@@ -912,33 +912,33 @@ async function renderLogs(main) {
         <tbody>${logs.map(l => `
           <tr>
             <td style="white-space:nowrap">${fmtDate(l.created_at)}</td>
-            <td>${escHtml(l.username || '')}</td>
+            <td>${escHtml(l.username || "")}</td>
             <td>${actionLabel(l.action)}</td>
-            <td>${escHtml(l.target_type || '')} ${l.target_id ? '#'+l.target_id : ''}</td>
-            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAttr(l.details || '')}">${escHtml(l.details || '')}</td>
-          </tr>`).join('')}</tbody>
+            <td>${escHtml(l.target_type || "")} ${l.target_id ? "#"+l.target_id : ""}</td>
+            <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escAttr(l.details || "")}">${escHtml(l.details || "")}</td>
+          </tr>`).join("")}</tbody>
       </table>`;
   } catch (err) {
-    document.getElementById('logsList').innerHTML =
+    document.getElementById("logsList").innerHTML =
       `<div class="empty-state"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
   }
 }
 
 function actionLabel(a) {
-  const map = { 'login':'登录', 'create_user':'创建用户', 'delete_user':'删除用户', 'change_role':'修改角色',
-    'create_record':'创建史事', 'update_record':'更新史事', 'delete_record':'删除史事',
-    'submit_review':'提交审核', 'approve_record':'审核通过', 'reject_record':'审核驳回',
-    'create_character':'创建人物', 'update_character':'更新人物', 'delete_character':'删除人物',
-    'create_material':'上传素材', 'update_material':'修改素材', 'delete_material':'删除素材' };
+  const map = { "login":"登录", "create_user":"创建用户", "delete_user":"删除用户", "change_role":"修改角色",
+    "create_record":"创建史事", "update_record":"更新史事", "delete_record":"删除史事",
+    "submit_review":"提交审核", "approve_record":"审核通过", "reject_record":"审核驳回",
+    "create_character":"创建人物", "update_character":"更新人物", "delete_character":"删除人物",
+    "create_material":"上传素材", "update_material":"修改素材", "delete_material":"删除素材" };
   return map[a] || a;
 }
 
 // ===================== 视图：系统配置 =====================
 async function renderConfig(main) {
-  main.innerHTML = `<h1>⚙️ 系统配置</h1><p class="subtitle">系统统计与配置信息（仅主任/常务副主任可查看）</p>`;
+  main.innerHTML = "<h1>⚙️ 系统配置</h1><p class=\"subtitle\">系统统计与配置信息（仅主任/常务副主任可查看）</p>";
 
   try {
-    const config = await api('/config');
+    const config = await api("/config");
     main.innerHTML += `
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-value">${config.users}</div><div class="stat-label">注册用户</div></div>
@@ -948,7 +948,7 @@ async function renderConfig(main) {
       <div class="card">
         <h3>📋 可用角色</h3>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
-          ${config.roles.map(r => `<span style="padding:6px 12px;background:var(--admin-bg);border-radius:6px;font-size:13px">${roleLabel(r)}</span>`).join('')}
+          ${config.roles.map(r => `<span style="padding:6px 12px;background:var(--admin-bg);border-radius:6px;font-size:13px">${roleLabel(r)}</span>`).join("")}
         </div>
       </div>
       <div class="card">
@@ -974,30 +974,30 @@ async function renderConfig(main) {
 
 // ===================== 工具函数 =====================
 function escHtml(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!s) return "";
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function escAttr(s) {
-  return escHtml(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return escHtml(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 function fmtDate(d) {
-  if (!d) return '';
+  if (!d) return "";
   try {
     const date = new Date(d);
     if (isNaN(date.getTime())) return d;
-    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
   } catch { return d; }
 }
 
 function typeLabel(t) {
-  const map = { 'zhengshi': '正史', 'waishi': '外史', 'xishi': '戏史' };
+  const map = { "zhengshi": "正史", "waishi": "外史", "xishi": "戏史" };
   return map[t] || t;
 }
 
 function typeIcon(t) {
-  const map = { 'text': '📝 文字', 'image': '🖼️ 图片', 'file': '📎 档案' };
+  const map = { "text": "📝 文字", "image": "🖼️ 图片", "file": "📎 档案" };
   return map[t] || t;
 }
 
@@ -1007,59 +1007,59 @@ function statusBadge(s) {
 
 // ===================== 注册 =====================
 async function register() {
-  const username = document.getElementById('regUsername').value.trim();
-  const password = document.getElementById('regPassword').value.trim();
-  const errorEl = document.getElementById('loginError');
-  if (!username || !password) { errorEl.textContent = '请填写用户名和密码'; return; }
-  if (/[一-鿿]/.test(username)) { errorEl.textContent = '账户名不能包含中文，请使用英文或拼音'; return; }
+  const username = document.getElementById("regUsername").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
+  const errorEl = document.getElementById("loginError");
+  if (!username || !password) { errorEl.textContent = "请填写用户名和密码"; return; }
+  if (/[一-鿿]/.test(username)) { errorEl.textContent = "账户名不能包含中文，请使用英文或拼音"; return; }
 
   try {
-    const data = await api('/auth/register', {
-      method: 'POST',
+    const data = await api("/auth/register", {
+      method: "POST",
       body: JSON.stringify({ username, password }),
     });
-    toast(data.message || '注册成功', 'success');
+    toast(data.message || "注册成功", "success");
     // 自动填充登录表单
-    document.getElementById('loginUsername').value = username;
-    document.getElementById('loginPassword').value = password;
+    document.getElementById("loginUsername").value = username;
+    document.getElementById("loginPassword").value = password;
     // 切换到登录模式
-    switchTab('login');
-    errorEl.textContent = '';
+    switchTab("login");
+    errorEl.textContent = "";
   } catch (err) {
     errorEl.textContent = err.message;
   }
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.login-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('loginError').textContent = '';
+  document.querySelectorAll(".login-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  document.getElementById("loginForm").style.display = tab === "login" ? "block" : "none";
+  document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
+  document.getElementById("loginError").textContent = "";
 }
 
 // ===================== 初始化 =====================
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('loginBtn').addEventListener('click', login);
-  document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') login();
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loginBtn").addEventListener("click", login);
+  document.getElementById("loginPassword").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") login();
   });
-  document.getElementById('loginUsername').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+  document.getElementById("loginUsername").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") document.getElementById("loginPassword").focus();
   });
-  document.getElementById('registerBtn').addEventListener('click', register);
-  document.getElementById('regPassword').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') register();
+  document.getElementById("registerBtn").addEventListener("click", register);
+  document.getElementById("regPassword").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") register();
   });
-  document.getElementById('regUsername').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') document.getElementById('regPassword').focus();
+  document.getElementById("regUsername").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") document.getElementById("regPassword").focus();
   });
-  document.querySelectorAll('.login-tab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  document.querySelectorAll(".login-tab").forEach(tab => {
+    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
   });
   checkAutoLogin();
 });
 
 // 点击模态框背景关闭
-document.addEventListener('click', (e) => {
-  if (e.target.id === 'modalOverlay') closeModal();
+document.addEventListener("click", (e) => {
+  if (e.target.id === "modalOverlay") closeModal();
 });

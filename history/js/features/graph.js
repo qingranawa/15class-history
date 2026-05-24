@@ -1,18 +1,19 @@
 // js/graph.js — 关系图谱
-import { showCharacterModal } from '../ui/modal.js';
-import { onModalOpen, bindModalClose } from '../core/common.js';
+/* global historyData, extraHistory, dramaHistory, characters, vis */
+import { showCharacterModal } from "../ui/modal.js";
+import { onModalOpen, bindModalClose } from "../core/common.js";
 
 let networkInstance = null;
 
 function getAllRecords() {
-    const d = typeof historyData !== 'undefined' ? historyData.records : [];
-    const e = typeof extraHistory !== 'undefined' ? extraHistory.records : [];
-    const dr = typeof dramaHistory !== 'undefined' ? dramaHistory.records : [];
+    const d = typeof historyData !== "undefined" ? historyData.records : [];
+    const e = typeof extraHistory !== "undefined" ? extraHistory.records : [];
+    const dr = typeof dramaHistory !== "undefined" ? dramaHistory.records : [];
     return [...d, ...e, ...dr];
 }
 
 function getCharacters() {
-    return typeof characters !== 'undefined' ? characters : [];
+    return typeof characters !== "undefined" ? characters : [];
 }
 
 // 构建人物关联数据
@@ -39,14 +40,14 @@ function buildGraphData() {
             title: `${c.name}<br>出场 ${count} 次`,
             value: count,
             size,
-            font: { size: 14, color: '#e6e9f0', face: 'serif' },
+            font: { size: 14, color: "#e6e9f0", face: "serif" },
             borderWidth: 2,
             color: {
-                background: 'rgba(201, 169, 89, 0.7)',
-                border: '#c9a959',
-                highlight: { background: '#e0c47a', border: '#c9a959' }
+                background: "rgba(201, 169, 89, 0.7)",
+                border: "#c9a959",
+                highlight: { background: "#e0c47a", border: "#c9a959" }
             },
-            shape: 'dot'
+            shape: "dot"
         });
         nodeMap[id] = true;
     });
@@ -72,7 +73,7 @@ function buildGraphData() {
             const shared = c1Records.filter(r => c2Records.some(r2 => (r2.id || r2.title) === (r.id || r.title)));
 
             if (shared.length > 0) {
-                const pairKey = [c1.name, c2.name].sort().join('||');
+                const pairKey = [c1.name, c2.name].sort().join("||");
                 if (!charPairs[pairKey]) {
                     charPairs[pairKey] = {
                         from: `char_${c1.name}`,
@@ -92,11 +93,11 @@ function buildGraphData() {
             to: p.to,
             width,
             color: {
-                color: 'rgba(201, 169, 89, 0.3)',
-                highlight: 'rgba(201, 169, 89, 0.7)'
+                color: "rgba(201, 169, 89, 0.3)",
+                highlight: "rgba(201, 169, 89, 0.7)"
             },
             title: `共同出现 ${p.count} 次`,
-            smooth: { type: 'continuous' }
+            smooth: { type: "continuous" }
         });
     });
 
@@ -104,11 +105,11 @@ function buildGraphData() {
 }
 
 function downloadGraph() {
-    const network = document.getElementById('graphNetwork');
+    const network = document.getElementById("graphNetwork");
     if (!network || !networkInstance) return;
 
     // 从 vis-network 拿到 canvas 元素
-    const canvasEl = network.querySelector('canvas');
+    const canvasEl = network.querySelector("canvas");
     if (!canvasEl) return;
 
     // 目标输出尺寸 1200x1500（4:5 比例）
@@ -118,8 +119,8 @@ function downloadGraph() {
     const origRect = network.getBoundingClientRect();
 
     // 放大容器，让 vis-network 在高分辨率下重绘
-    network.style.width = OUT_W + 'px';
-    network.style.height = OUT_H + 'px';
+    network.style.width = OUT_W + "px";
+    network.style.height = OUT_H + "px";
     networkInstance.setSize(OUT_W, OUT_H);
     networkInstance.fit({ animation: false });
 
@@ -127,23 +128,23 @@ function downloadGraph() {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             // 此时 canvasEl 已经以 OUT_W x OUT_H 渲染完毕
-            const out = document.createElement('canvas');
+            const out = document.createElement("canvas");
             out.width = OUT_W;
             out.height = OUT_H;
-            const ctx = out.getContext('2d');
+            const ctx = out.getContext("2d");
             ctx.drawImage(canvasEl, 0, 0, OUT_W, OUT_H);
 
             out.toBlob(blob => {
                 // 恢复原始尺寸
-                network.style.width = origRect.width + 'px';
-                network.style.height = origRect.height + 'px';
+                network.style.width = origRect.width + "px";
+                network.style.height = origRect.height + "px";
                 networkInstance.setSize(origRect.width, origRect.height);
                 networkInstance.fit({ animation: false });
 
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const a = document.createElement("a");
                 a.href = url;
-                a.download = '人物关系图谱.png';
+                a.download = "人物关系图谱.png";
                 a.click();
                 URL.revokeObjectURL(url);
             });
@@ -152,13 +153,13 @@ function downloadGraph() {
 }
 
 export function showGraphModal() {
-    const modalId = 'graphModal';
+    const modalId = "graphModal";
     let modal = document.getElementById(modalId);
 
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal graph-modal hidden';
+        modal.className = "history-modal graph-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
@@ -187,7 +188,7 @@ export function showGraphModal() {
         `;
 
         // 下载图谱按钮
-        modal.querySelector('#downloadGraphBtn').addEventListener('click', downloadGraph);
+        modal.querySelector("#downloadGraphBtn").addEventListener("click", downloadGraph);
         document.body.appendChild(modal);
         bindModalClose(modal, modalId, () => {
             if (networkInstance) {
@@ -197,7 +198,7 @@ export function showGraphModal() {
         });
     }
 
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 
     // 渲染图谱，等模态框可见后获取正确尺寸
@@ -205,12 +206,12 @@ export function showGraphModal() {
 }
 
 function initGraph(modal) {
-    const container = document.getElementById('graphNetwork');
+    const container = document.getElementById("graphNetwork");
     if (!container) return;
 
     // 检查 vis 库是否加载
-    if (typeof vis === 'undefined') {
-        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">vis-network 加载中…</p>';
+    if (typeof vis === "undefined") {
+        container.innerHTML = "<p style=\"color:var(--text-muted);text-align:center;padding:40px;\">vis-network 加载中…</p>";
         setTimeout(() => initGraph(modal), 500);
         return;
     }
@@ -218,7 +219,7 @@ function initGraph(modal) {
     const { nodes: nodesData, edges: edgesData } = buildGraphData();
 
     if (nodesData.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">暂无人物数据</p>';
+        container.innerHTML = "<p style=\"color:var(--text-muted);text-align:center;padding:40px;\">暂无人物数据</p>";
         return;
     }
 
@@ -229,14 +230,14 @@ function initGraph(modal) {
     }
 
     // 清空容器
-    container.innerHTML = '';
+    container.innerHTML = "";
 
     // 锁定容器高度（防止 flex + vis 无限循环撑大）
     const rect = container.getBoundingClientRect();
     if (rect.height > 0) {
-        container.style.height = rect.height + 'px';
+        container.style.height = rect.height + "px";
     } else {
-        container.style.height = '400px';
+        container.style.height = "400px";
     }
 
     const nodes = new vis.DataSet(nodesData);
@@ -247,7 +248,7 @@ function initGraph(modal) {
     const options = {
         physics: {
             enabled: true,
-            solver: 'barnesHut',
+            solver: "barnesHut",
             stabilization: {
                 iterations: 100,
                 updateInterval: 25
@@ -267,16 +268,16 @@ function initGraph(modal) {
             keyboard: false
         },
         edges: {
-            smooth: { type: 'curvedCW', roundness: 0.2 }
+            smooth: { type: "curvedCW", roundness: 0.2 }
         },
         nodes: {
-            shape: 'dot',
-            font: { face: 'serif', size: 14, color: '#e6e9f0' },
+            shape: "dot",
+            font: { face: "serif", size: 14, color: "#e6e9f0" },
             borderWidth: 2,
             color: {
-                background: 'rgba(201, 169, 89, 0.7)',
-                border: '#c9a959',
-                highlight: { background: '#e0c47a', border: '#c9a959' }
+                background: "rgba(201, 169, 89, 0.7)",
+                border: "#c9a959",
+                highlight: { background: "#e0c47a", border: "#c9a959" }
             }
         },
         height: container.style.height
@@ -285,7 +286,7 @@ function initGraph(modal) {
     networkInstance = new vis.Network(container, { nodes, edges }, options);
 
     // 稳定完成后关闭物理引擎，避免无限移动撑大页面
-    networkInstance.on('stabilizationIterationsDone', () => {
+    networkInstance.on("stabilizationIterationsDone", () => {
         if (physicsEnabled) {
             physicsEnabled = false;
             networkInstance.setOptions({ physics: { enabled: false } });
@@ -293,20 +294,20 @@ function initGraph(modal) {
     });
 
     // 阻止图上点击冒泡导致 overlay 关闭
-    container.addEventListener('click', (e) => e.stopPropagation());
+    container.addEventListener("click", (e) => e.stopPropagation());
 
-    networkInstance.on('click', (params) => {
+    networkInstance.on("click", (params) => {
         if (params.nodes.length > 0) {
             const nodeId = params.nodes[0];
             const chars = getCharacters();
-            const charName = nodeId.replace('char_', '');
+            const charName = nodeId.replace("char_", "");
             const char = chars.find(c => c.name === charName);
             if (char) {
                 // 带退出动画关闭图谱 → 打开人物详情
-                modal.classList.add('closing');
+                modal.classList.add("closing");
                 setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('closing');
+                    modal.classList.add("hidden");
+                    modal.classList.remove("closing");
                     showCharacterModal(char);
                 }, 150);
             }

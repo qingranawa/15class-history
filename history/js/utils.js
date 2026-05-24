@@ -1,20 +1,20 @@
 // 通用工具函数
 export function escapeHtml(str) {
-    if (!str) return '';
+    if (!str) return "";
     return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
+        if (m === "&") return "&amp;";
+        if (m === "<") return "&lt;";
+        if (m === ">") return "&gt;";
         return m;
     });
 }
 
 export function parseCustomTags(str) {
     const tagMap = {
-        'b': { open: '<strong>', close: '</strong>' },
-        'l': { open: '<em>', close: '</em>' },
-        '=': { open: '<div style="text-align:center;">', close: '</div>' },
-        'poem': { open: '<div class="poem">', close: '</div>' }
+        "b": { open: "<strong>", close: "</strong>" },
+        "l": { open: "<em>", close: "</em>" },
+        "=": { open: "<div style=\"text-align:center;\">", close: "</div>" },
+        "poem": { open: "<div class=\"poem\">", close: "</div>" }
     };
     const regex = /\[([a-z=]+)\]([\s\S]*?)\[\/\1\]/;
     let match;
@@ -32,11 +32,11 @@ export function parseCustomTags(str) {
 }
 
 export function formatContent(content) {
-    if (!content) return '';
+    if (!content) return "";
     let withHtml = parseCustomTags(content);
     let formatted = withHtml
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>');
+        .replace(/\n\n/g, "</p><p>")
+        .replace(/\n/g, "<br>");
     const blockStart = formatted.match(/^<(p|div|strong|em)/);
     if (!blockStart) {
         formatted = `<p>${formatted}</p>`;
@@ -55,6 +55,6 @@ export function sortByDate(records) {
 
 // 安全获取全局数据
 export function getSafeData(dataName) {
-    const fallback = dataName === 'characters' ? [] : { records: [] };
-    return typeof window[dataName] !== 'undefined' ? window[dataName] : fallback;
+    const fallback = dataName === "characters" ? [] : { records: [] };
+    return typeof window[dataName] !== "undefined" ? window[dataName] : fallback;
 }

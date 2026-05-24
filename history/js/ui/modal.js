@@ -1,5 +1,5 @@
 // js/modal.js
-import { escapeHtml, formatContent } from '../utils.js';
+import { escapeHtml, formatContent } from "../utils.js";
 import {
     EXTERNAL_LINKS,
     safeHistoryData,
@@ -10,18 +10,18 @@ import {
     ensureShortcuts,
     onModalOpen,
     bindModalClose
-} from '../core/common.js';
+} from "../core/common.js";
 
 ensureShortcuts();
 
 // ---------- 纪传模态框 ----------
 export function getRecordModal() {
-    const modalId = 'recordModal';
+    const modalId = "recordModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
@@ -50,9 +50,9 @@ export function getRecordModal() {
         `;
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
-        modal.querySelector('#joinUsLink').addEventListener('click', (e) => {
+        modal.querySelector("#joinUsLink").addEventListener("click", (e) => {
             e.preventDefault();
-            import('./modal-extras.js').then(m => m.showJoinUsModal());
+            import("./modal-extras.js").then(m => m.showJoinUsModal());
         });
     }
     return modal;
@@ -60,59 +60,59 @@ export function getRecordModal() {
 
 export function showRecordModal(record) {
     const modal = getRecordModal();
-    document.getElementById('modalDetailCard').innerHTML = `
+    document.getElementById("modalDetailCard").innerHTML = `
         <h2>${escapeHtml(record.title)}</h2>
         <div class="content">${formatContent(record.content)}</div>
-        <div class="honorific">${escapeHtml(record.honorific).replace(/\n/g, '<br>')}</div>
+        <div class="honorific">${escapeHtml(record.honorific).replace(/\n/g, "<br>")}</div>
     `;
-    const notesDiv = document.getElementById('modalNotesContent');
-    notesDiv.innerHTML = record.notes ? `<p>${escapeHtml(record.notes)}</p>` : '<p class="empty-notes">暂无注释。</p>';
+    const notesDiv = document.getElementById("modalNotesContent");
+    notesDiv.innerHTML = record.notes ? `<p>${escapeHtml(record.notes)}</p>` : "<p class=\"empty-notes\">暂无注释。</p>";
     const related = findRelatedCharacters(record);
-    const grid = document.getElementById('modalRelatedGrid');
+    const grid = document.getElementById("modalRelatedGrid");
     if (related.length) {
-        grid.innerHTML = '';
+        grid.innerHTML = "";
         related.forEach(char => {
-            const card = document.createElement('div');
-            card.className = 'character-card';
+            const card = document.createElement("div");
+            card.className = "character-card";
             card.innerHTML = `<div class="char-name">${escapeHtml(char.name)}</div>
-                ${char.nicknames?.length ? `<div class="char-nicknames">🏷️ ${char.nicknames.join(' · ')}</div>` : ''}
+                ${char.nicknames?.length ? `<div class="char-nicknames">🏷️ ${char.nicknames.join(" · ")}</div>` : ""}
                 <div class="char-desc">${escapeHtml(char.desc)}</div>`;
-            card.addEventListener('click', () => { modal.classList.add('hidden'); showCharacterModal(char); });
+            card.addEventListener("click", () => { modal.classList.add("hidden"); showCharacterModal(char); });
             grid.appendChild(card);
         });
     } else {
-        grid.innerHTML = '<p class="empty-related">未识别到相关人物。</p>';
+        grid.innerHTML = "<p class=\"empty-related\">未识别到相关人物。</p>";
     }
 
     // 分享按钮
-    const shareBtn = document.getElementById('shareRecordBtn');
+    const shareBtn = document.getElementById("shareRecordBtn");
     if (shareBtn) {
         const newShareBtn = shareBtn.cloneNode(true);
         shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
-        newShareBtn.addEventListener('click', () => {
-            import('../features/share.js').then(m => m.shareRecord(record));
+        newShareBtn.addEventListener("click", () => {
+            import("../features/share.js").then(m => m.shareRecord(record));
         });
     }
 
     // 雁过留声 · 评注
     const recordId = record.id || record.title;
-    const commentsContainer = document.getElementById('modalCommentsContainer');
+    const commentsContainer = document.getElementById("modalCommentsContainer");
     if (commentsContainer) {
-        import('../features/comments.js').then(m => m.renderComments(recordId, commentsContainer));
+        import("../features/comments.js").then(m => m.renderComments(recordId, commentsContainer));
     }
 
-    modal.classList.remove('hidden');
-    onModalOpen('recordModal');
+    modal.classList.remove("hidden");
+    onModalOpen("recordModal");
 }
 
 // ---------- 人物模态框 ----------
 export function getCharacterModal() {
-    const modalId = 'characterModal';
+    const modalId = "characterModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
@@ -134,35 +134,35 @@ export function getCharacterModal() {
 
 export function showCharacterModal(character) {
     const modal = getCharacterModal();
-    document.getElementById('characterDetail').innerHTML = `
+    document.getElementById("characterDetail").innerHTML = `
         <h2>${escapeHtml(character.name)}</h2>
-        <div class="char-info"><strong>性别：</strong>${escapeHtml(character.gender || '未知')}</div>
-        <div class="char-info"><strong>第一次入史年龄：</strong>${escapeHtml(String(character.firstAge || '不详'))}</div>
-        <div class="char-info"><strong>特征：</strong>${escapeHtml(character.traits || '无')}</div>
+        <div class="char-info"><strong>性别：</strong>${escapeHtml(character.gender || "未知")}</div>
+        <div class="char-info"><strong>第一次入史年龄：</strong>${escapeHtml(String(character.firstAge || "不详"))}</div>
+        <div class="char-info"><strong>特征：</strong>${escapeHtml(character.traits || "无")}</div>
         <div class="char-desc-full">${escapeHtml(character.desc)}</div>
     `;
     const records = findRelatedRecords(character);
-    const list = document.getElementById('relatedRecordsList');
+    const list = document.getElementById("relatedRecordsList");
     if (records.length) {
-        list.innerHTML = '';
+        list.innerHTML = "";
         records.forEach(r => {
-            const item = document.createElement('div');
-            item.className = 'related-record-item';
+            const item = document.createElement("div");
+            item.className = "related-record-item";
             item.innerHTML = `<div class="record-title">${escapeHtml(r.title)}</div>`;
-            item.addEventListener('click', () => { modal.classList.add('hidden'); showRecordModal(r); });
+            item.addEventListener("click", () => { modal.classList.add("hidden"); showRecordModal(r); });
             list.appendChild(item);
         });
     } else {
-        list.innerHTML = '<p class="empty-related">未发现相关史事。</p>';
+        list.innerHTML = "<p class=\"empty-related\">未发现相关史事。</p>";
     }
-    modal.classList.remove('hidden');
-    onModalOpen('characterModal');
+    modal.classList.remove("hidden");
+    onModalOpen("characterModal");
 }
 
 // ---------- 辅助函数 ----------
 // 辅助函数：去除自定义标签提取纯文本
 function stripTags(text) {
-    return text.replace(/\[[a-z=]+\]/g, '').replace(/\[\/[a-z=]+\]/g, '');
+    return text.replace(/\[[a-z=]+\]/g, "").replace(/\[\/[a-z=]+\]/g, "");
 }
 
 function findRelatedRecords(character) {
@@ -184,14 +184,14 @@ function findRelatedCharacters(record) {
 
 // ================== 搜索模态框 ==================
 export function showSearchModal() {
-    const modalId = 'searchModal';
+    const modalId = "searchModal";
     let modal = document.getElementById(modalId);
     const globalDataSource = [...safeHistoryData.records, ...safeExtraHistory.records, ...safeDramaHistory.records];
 
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal search-modal hidden';
+        modal.className = "history-modal search-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
@@ -234,39 +234,39 @@ export function showSearchModal() {
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
 
-        const innerInput = document.getElementById('innerSearchInput');
-        const searchBtn = document.getElementById('innerSearchBtn');
-        const clearBtn = document.getElementById('innerClearBtn');
-        const resultCount = document.getElementById('searchResultCount');
-        const filterOpts = modal.querySelectorAll('.filter-option');
-        const charContainer = document.getElementById('characterSelectorContainer');
-        const charSelect = document.getElementById('characterSelect');
-        const dateContainer = document.getElementById('dateRangeContainer');
-        const startDate = document.getElementById('startDate');
-        const endDate = document.getElementById('endDate');
-        const clearDateBtn = document.getElementById('clearDateBtn');
-        const gradeContainer = document.getElementById('gradeSelectorContainer');
-        const gradeSelect = document.getElementById('gradeSelect');
-        const resultsArea = document.getElementById('searchResultsArea');
+        const innerInput = document.getElementById("innerSearchInput");
+        const searchBtn = document.getElementById("innerSearchBtn");
+        const clearBtn = document.getElementById("innerClearBtn");
+        const resultCount = document.getElementById("searchResultCount");
+        const filterOpts = modal.querySelectorAll(".filter-option");
+        const charContainer = document.getElementById("characterSelectorContainer");
+        const charSelect = document.getElementById("characterSelect");
+        const dateContainer = document.getElementById("dateRangeContainer");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+        const clearDateBtn = document.getElementById("clearDateBtn");
+        const gradeContainer = document.getElementById("gradeSelectorContainer");
+        const gradeSelect = document.getElementById("gradeSelect");
+        const resultsArea = document.getElementById("searchResultsArea");
 
-        let currentFilter = 'all';
+        let currentFilter = "all";
 
         const populateCharacters = () => {
-            charSelect.innerHTML = '<option value="">-- 选择人物 --</option>';
+            charSelect.innerHTML = "<option value=\"\">-- 选择人物 --</option>";
             safeCharacters.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => {
-                const opt = document.createElement('option');
+                const opt = document.createElement("option");
                 opt.value = c.name;
-                opt.textContent = `${c.name} ${c.nicknames?.length ? '(' + c.nicknames.join('/') + ')' : ''}`;
+                opt.textContent = `${c.name} ${c.nicknames?.length ? "(" + c.nicknames.join("/") + ")" : ""}`;
                 charSelect.appendChild(opt);
             });
         };
         populateCharacters();
 
         const populateGrades = () => {
-            gradeSelect.innerHTML = '<option value="">-- 选择年级 --</option>';
+            gradeSelect.innerHTML = "<option value=\"\">-- 选择年级 --</option>";
             const grades = getAllGrades();
             grades.forEach(grade => {
-                const opt = document.createElement('option');
+                const opt = document.createElement("option");
                 opt.value = grade;
                 opt.textContent = grade;
                 gradeSelect.appendChild(opt);
@@ -275,20 +275,20 @@ export function showSearchModal() {
         populateGrades();
 
         filterOpts.forEach(opt => {
-            opt.addEventListener('click', () => {
-                filterOpts.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
+            opt.addEventListener("click", () => {
+                filterOpts.forEach(o => o.classList.remove("active"));
+                opt.classList.add("active");
                 currentFilter = opt.dataset.filter;
-                charContainer.classList.toggle('hidden', currentFilter !== 'character');
-                dateContainer.classList.toggle('hidden', currentFilter !== 'date');
-                gradeContainer.classList.toggle('hidden', currentFilter !== 'grade');
-                if (currentFilter !== 'date') { startDate.value = ''; endDate.value = ''; }
-                if (currentFilter !== 'character') charSelect.value = '';
-                if (currentFilter !== 'grade') gradeSelect.value = '';
+                charContainer.classList.toggle("hidden", currentFilter !== "character");
+                dateContainer.classList.toggle("hidden", currentFilter !== "date");
+                gradeContainer.classList.toggle("hidden", currentFilter !== "grade");
+                if (currentFilter !== "date") { startDate.value = ""; endDate.value = ""; }
+                if (currentFilter !== "character") charSelect.value = "";
+                if (currentFilter !== "grade") gradeSelect.value = "";
             });
         });
 
-        clearDateBtn.addEventListener('click', () => { startDate.value = ''; endDate.value = ''; });
+        clearDateBtn.addEventListener("click", () => { startDate.value = ""; endDate.value = ""; });
 
         // 防抖工具
         let searchTimer = null;
@@ -303,14 +303,14 @@ export function showSearchModal() {
 
             if (keyword) {
                 results = results.filter(r =>
-                    (r.title || '').toLowerCase().includes(keyword) ||
-                    (r.content || '').toLowerCase().includes(keyword) ||
-                    (r.honorific || '').toLowerCase().includes(keyword) ||
-                    (r.notes || '').toLowerCase().includes(keyword)
+                    (r.title || "").toLowerCase().includes(keyword) ||
+                    (r.content || "").toLowerCase().includes(keyword) ||
+                    (r.honorific || "").toLowerCase().includes(keyword) ||
+                    (r.notes || "").toLowerCase().includes(keyword)
                 );
             }
 
-            if (currentFilter === 'character') {
+            if (currentFilter === "character") {
                 const selectedChar = charSelect.value;
                 if (selectedChar) {
                     const charObj = safeCharacters.find(c => c.name === selectedChar);
@@ -322,7 +322,7 @@ export function showSearchModal() {
                         });
                     }
                 }
-            } else if (currentFilter === 'date') {
+            } else if (currentFilter === "date") {
                 const start = startDate.value ? new Date(startDate.value) : null;
                 const end = endDate.value ? new Date(endDate.value) : null;
                 results = results.filter(r => {
@@ -333,7 +333,7 @@ export function showSearchModal() {
                     if (end && d > end) return false;
                     return true;
                 });
-            } else if (currentFilter === 'grade') {
+            } else if (currentFilter === "grade") {
                 const selectedGrade = gradeSelect.value;
                 if (selectedGrade) results = results.filter(r => r.grade === selectedGrade);
             }
@@ -341,58 +341,58 @@ export function showSearchModal() {
             renderSearchResults(results, keyword, resultsArea, resultCount);
         };
 
-        searchBtn.addEventListener('click', performSearch);
-        innerInput.addEventListener('input', debouncedSearch);
-        innerInput.addEventListener('keypress', e => e.key === 'Enter' && performSearch());
-        clearBtn.addEventListener('click', () => {
-            innerInput.value = '';
-            filterOpts.forEach(o => o.classList.remove('active'));
-            filterOpts[0].classList.add('active');
-            currentFilter = 'all';
-            charContainer.classList.add('hidden');
-            dateContainer.classList.add('hidden');
-            gradeContainer.classList.add('hidden');
-            charSelect.value = '';
-            startDate.value = ''; endDate.value = '';
-            gradeSelect.value = '';
-            resultsArea.innerHTML = '<p class="empty-notes">输入关键词开始搜索</p>';
-            if (resultCount) resultCount.textContent = '';
+        searchBtn.addEventListener("click", performSearch);
+        innerInput.addEventListener("input", debouncedSearch);
+        innerInput.addEventListener("keypress", e => e.key === "Enter" && performSearch());
+        clearBtn.addEventListener("click", () => {
+            innerInput.value = "";
+            filterOpts.forEach(o => o.classList.remove("active"));
+            filterOpts[0].classList.add("active");
+            currentFilter = "all";
+            charContainer.classList.add("hidden");
+            dateContainer.classList.add("hidden");
+            gradeContainer.classList.add("hidden");
+            charSelect.value = "";
+            startDate.value = ""; endDate.value = "";
+            gradeSelect.value = "";
+            resultsArea.innerHTML = "<p class=\"empty-notes\">输入关键词开始搜索</p>";
+            if (resultCount) resultCount.textContent = "";
         });
     }
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
     // 自动聚焦
-    setTimeout(() => document.getElementById('innerSearchInput')?.focus(), 100);
+    setTimeout(() => document.getElementById("innerSearchInput")?.focus(), 100);
 }
 
 function renderSearchResults(results, keyword, container, countEl) {
     if (countEl) {
-        countEl.textContent = results.length ? `共找到 ${results.length} 条结果` : '';
+        countEl.textContent = results.length ? `共找到 ${results.length} 条结果` : "";
     }
     if (!results.length) {
-        container.innerHTML = '<p class="empty-notes">未找到匹配记录</p>';
+        container.innerHTML = "<p class=\"empty-notes\">未找到匹配记录</p>";
         return;
     }
     const highlight = (text) => {
         if (!keyword) return escapeHtml(text);
-        const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return escapeHtml(text).replace(regex, '<span class="search-highlight">$1</span>');
+        const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+        return escapeHtml(text).replace(regex, "<span class=\"search-highlight\">$1</span>");
     };
-    container.innerHTML = '';
+    container.innerHTML = "";
     results.forEach((r, idx) => {
-        const div = document.createElement('div');
-        div.className = 'result-item-compact';
+        const div = document.createElement("div");
+        div.className = "result-item-compact";
         div.style.animationDelay = `${idx * 0.03}s`;
-        const preview = r.content.replace(/\[[^\]]+\]/g, '').substring(0, 80) + '……';
+        const preview = r.content.replace(/\[[^\]]+\]/g, "").substring(0, 80) + "……";
         div.innerHTML = `
             <div class="result-title-compact">
                 ${highlight(r.title)}
-                <span class="result-grade-tag">${escapeHtml(r.grade || '')}</span>
+                <span class="result-grade-tag">${escapeHtml(r.grade || "")}</span>
             </div>
             <div class="result-preview">${highlight(preview)}</div>
         `;
-        div.addEventListener('click', () => {
-            document.getElementById('searchModal').classList.add('hidden');
+        div.addEventListener("click", () => {
+            document.getElementById("searchModal").classList.add("hidden");
             showRecordModal(r);
         });
         container.appendChild(div);
@@ -401,14 +401,14 @@ function renderSearchResults(results, keyword, container, countEl) {
 
 // ================== 随机品读模态框 ==================
 export function showRandomModal() {
-    const modalId = 'randomModal';
+    const modalId = "randomModal";
     let modal = document.getElementById(modalId);
     const globalDataSource = [...safeHistoryData.records, ...safeExtraHistory.records, ...safeDramaHistory.records];
 
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal random-modal hidden';
+        modal.className = "history-modal random-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
@@ -445,36 +445,36 @@ export function showRandomModal() {
         `;
         document.body.appendChild(modal);
         const closeModal = bindModalClose(modal, modalId, () => {
-            const rollBtn = document.getElementById('randomRollBtn');
-            if (rollBtn) rollBtn.classList.remove('rolling');
+            const rollBtn = document.getElementById("randomRollBtn");
+            if (rollBtn) rollBtn.classList.remove("rolling");
         });
 
-        const filterOpts = modal.querySelectorAll('[data-random-filter]');
-        const charDiv = document.getElementById('randomCharSelectContainer');
-        const charSelect = document.getElementById('randomCharSelect');
-        const dateDiv = document.getElementById('randomDateContainer');
-        const startDate = document.getElementById('randomStartDate');
-        const endDate = document.getElementById('randomEndDate');
-        const clearDate = document.getElementById('randomClearDate');
-        const gradeDiv = document.getElementById('randomGradeContainer');
-        const gradeSelect = document.getElementById('randomGradeSelect');
-        const rollBtn = document.getElementById('randomRollBtn');
-        const displayDiv = document.getElementById('randomRecordDisplay');
+        const filterOpts = modal.querySelectorAll("[data-random-filter]");
+        const charDiv = document.getElementById("randomCharSelectContainer");
+        const charSelect = document.getElementById("randomCharSelect");
+        const dateDiv = document.getElementById("randomDateContainer");
+        const startDate = document.getElementById("randomStartDate");
+        const endDate = document.getElementById("randomEndDate");
+        const clearDate = document.getElementById("randomClearDate");
+        const gradeDiv = document.getElementById("randomGradeContainer");
+        const gradeSelect = document.getElementById("randomGradeSelect");
+        const rollBtn = document.getElementById("randomRollBtn");
+        const displayDiv = document.getElementById("randomRecordDisplay");
 
-        let currentRandomFilter = 'all';
+        let currentRandomFilter = "all";
         let abortController = new AbortController();
 
         safeCharacters.sort((a, b) => a.name.localeCompare(b.name)).forEach(c => {
-            const opt = document.createElement('option');
+            const opt = document.createElement("option");
             opt.value = c.name;
-            opt.textContent = `${c.name} ${c.nicknames?.length ? '(' + c.nicknames.join('/') + ')' : ''}`;
+            opt.textContent = `${c.name} ${c.nicknames?.length ? "(" + c.nicknames.join("/") + ")" : ""}`;
             charSelect.appendChild(opt);
         });
 
         const populateGrades = () => {
-            gradeSelect.innerHTML = '<option value="">-- 选择年级 --</option>';
+            gradeSelect.innerHTML = "<option value=\"\">-- 选择年级 --</option>";
             getAllGrades().forEach(grade => {
-                const opt = document.createElement('option');
+                const opt = document.createElement("option");
                 opt.value = grade;
                 opt.textContent = grade;
                 gradeSelect.appendChild(opt);
@@ -483,19 +483,19 @@ export function showRandomModal() {
         populateGrades();
 
         filterOpts.forEach(opt => {
-            opt.addEventListener('click', () => {
-                filterOpts.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
+            opt.addEventListener("click", () => {
+                filterOpts.forEach(o => o.classList.remove("active"));
+                opt.classList.add("active");
                 currentRandomFilter = opt.dataset.randomFilter;
-                charDiv.classList.toggle('hidden', currentRandomFilter !== 'character');
-                dateDiv.classList.toggle('hidden', currentRandomFilter !== 'date');
-                gradeDiv.classList.toggle('hidden', currentRandomFilter !== 'grade');
-                if (currentRandomFilter !== 'date') { startDate.value = ''; endDate.value = ''; }
-                if (currentRandomFilter !== 'character') charSelect.value = '';
-                if (currentRandomFilter !== 'grade') gradeSelect.value = '';
+                charDiv.classList.toggle("hidden", currentRandomFilter !== "character");
+                dateDiv.classList.toggle("hidden", currentRandomFilter !== "date");
+                gradeDiv.classList.toggle("hidden", currentRandomFilter !== "grade");
+                if (currentRandomFilter !== "date") { startDate.value = ""; endDate.value = ""; }
+                if (currentRandomFilter !== "character") charSelect.value = "";
+                if (currentRandomFilter !== "grade") gradeSelect.value = "";
             });
         });
-        clearDate.addEventListener('click', () => { startDate.value = ''; endDate.value = ''; });
+        clearDate.addEventListener("click", () => { startDate.value = ""; endDate.value = ""; });
 
         const doRoll = () => {
             abortController.abort();
@@ -503,9 +503,9 @@ export function showRandomModal() {
             const signal = abortController.signal;
 
             let pool = [...globalDataSource];
-            if (currentRandomFilter === 'character') {
+            if (currentRandomFilter === "character") {
                 const sel = charSelect.value;
-                if (!sel) { alert('请选择人物'); return; }
+                if (!sel) { alert("请选择人物"); return; }
                 const charObj = safeCharacters.find(c => c.name === sel);
                 if (charObj) {
                     const names = [charObj.name.toLowerCase(), ...(charObj.nicknames || []).map(n => n.toLowerCase())];
@@ -514,10 +514,10 @@ export function showRandomModal() {
                         return names.some(n => text.includes(n));
                     });
                 }
-            } else if (currentRandomFilter === 'date') {
+            } else if (currentRandomFilter === "date") {
                 const start = startDate.value;
                 const end = endDate.value;
-                if (!start || !end) { alert('请选择完整时间段'); return; }
+                if (!start || !end) { alert("请选择完整时间段"); return; }
                 const startD = new Date(start);
                 const endD = new Date(end);
                 pool = pool.filter(r => {
@@ -525,20 +525,20 @@ export function showRandomModal() {
                     const d = new Date(r.date);
                     return d >= startD && d <= endD;
                 });
-            } else if (currentRandomFilter === 'grade') {
+            } else if (currentRandomFilter === "grade") {
                 const sel = gradeSelect.value;
-                if (!sel) { alert('请选择年级'); return; }
+                if (!sel) { alert("请选择年级"); return; }
                 pool = pool.filter(r => r.grade === sel);
             }
 
             if (!pool.length) {
-                displayDiv.innerHTML = '<p class="empty-notes">无符合条件的记录</p>';
+                displayDiv.innerHTML = "<p class=\"empty-notes\">无符合条件的记录</p>";
                 return;
             }
 
-            rollBtn.classList.add('rolling');
-            rollBtn.textContent = '🎲 摇签中…';
-            displayDiv.innerHTML = '<div class="random-loading">🎲 摇签中...</div>';
+            rollBtn.classList.add("rolling");
+            rollBtn.textContent = "🎲 摇签中…";
+            displayDiv.innerHTML = "<div class=\"random-loading\">🎲 摇签中...</div>";
 
             setTimeout(() => {
                 if (signal.aborted) return;
@@ -548,28 +548,28 @@ export function showRandomModal() {
                     <div class="content">${formatContent(rec.content)}</div>
                     <div class="honorific">${escapeHtml(rec.honorific)}</div>
                 `;
-                displayDiv.style.cursor = 'pointer';
+                displayDiv.style.cursor = "pointer";
                 const onClick = () => {
                     closeModal();
                     showRecordModal(rec);
-                    displayDiv.removeEventListener('click', onClick);
+                    displayDiv.removeEventListener("click", onClick);
                 };
-                displayDiv.addEventListener('click', onClick, { signal });
-                rollBtn.classList.remove('rolling');
-                rollBtn.textContent = '🎲 再来一篇';
+                displayDiv.addEventListener("click", onClick, { signal });
+                rollBtn.classList.remove("rolling");
+                rollBtn.textContent = "🎲 再来一篇";
             }, 300);
         };
-        rollBtn.addEventListener('click', doRoll);
+        rollBtn.addEventListener("click", doRoll);
         modal._abortController = abortController;
     }
-    const displayDiv = document.getElementById('randomRecordDisplay');
-    displayDiv.innerHTML = '<p class="empty-notes">点击「摇一签」开始</p>';
-    displayDiv.style.cursor = 'default';
-    const rollBtn = document.getElementById('randomRollBtn');
+    const displayDiv = document.getElementById("randomRecordDisplay");
+    displayDiv.innerHTML = "<p class=\"empty-notes\">点击「摇一签」开始</p>";
+    displayDiv.style.cursor = "default";
+    const rollBtn = document.getElementById("randomRollBtn");
     if (rollBtn) {
-        rollBtn.classList.remove('rolling');
-        rollBtn.textContent = '🎲 摇一签';
+        rollBtn.classList.remove("rolling");
+        rollBtn.textContent = "🎲 摇一签";
     }
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 }

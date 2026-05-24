@@ -1,23 +1,23 @@
 // js/modal-extras.js
-import { escapeHtml } from '../utils.js';
+import { escapeHtml } from "../utils.js";
 import {
     EXTERNAL_LINKS,
     CONTACT_PERSONS,
     ensureShortcuts,
     onModalOpen,
     bindModalClose
-} from '../core/common.js';
+} from "../core/common.js";
 
 ensureShortcuts();
 
 // ---------- 加入我们模态框 ----------
 export function showJoinUsModal() {
-    const modalId = 'joinUsModal';
+    const modalId = "joinUsModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 450px;">
@@ -33,11 +33,11 @@ export function showJoinUsModal() {
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
     }
-    const listContainer = document.getElementById('contactList');
-    listContainer.innerHTML = '';
+    const listContainer = document.getElementById("contactList");
+    listContainer.innerHTML = "";
     CONTACT_PERSONS.forEach(person => {
-        const item = document.createElement('div');
-        item.style.cssText = 'background: var(--card-bg); border-radius: 12px; padding: 14px 18px; border: 1px solid var(--border-light);';
+        const item = document.createElement("div");
+        item.style.cssText = "background: var(--card-bg); border-radius: 12px; padding: 14px 18px; border: 1px solid var(--border-light);";
         item.innerHTML = `
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 1.8rem;">👤</span>
@@ -49,18 +49,18 @@ export function showJoinUsModal() {
         `;
         listContainer.appendChild(item);
     });
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 }
 
 // ---------- 如何投稿模态框 ----------
 export function showContributeModal() {
-    const modalId = 'contributeModal';
+    const modalId = "contributeModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 600px;">
@@ -88,18 +88,18 @@ export function showContributeModal() {
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
     }
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 }
 
 // ---------- 新手指南模态框 ----------
 export function showGuideModal() {
-    const modalId = 'guideModal';
+    const modalId = "guideModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 650px;">
@@ -120,18 +120,18 @@ export function showGuideModal() {
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
     }
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 }
 
 // ---------- 免责协议模态框 ----------
 export function showDisclaimerModal() {
-    const modalId = 'disclaimerModal';
+    const modalId = "disclaimerModal";
     let modal = document.getElementById(modalId);
     if (!modal) {
-        modal = document.createElement('div');
+        modal = document.createElement("div");
         modal.id = modalId;
-        modal.className = 'history-modal hidden';
+        modal.className = "history-modal hidden";
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container" style="max-width: 700px;">
@@ -153,6 +153,6 @@ export function showDisclaimerModal() {
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
     }
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     onModalOpen(modalId);
 }
