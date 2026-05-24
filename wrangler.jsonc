@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "15class",
+  "compatibility_date": "2026-05-24",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "history"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
