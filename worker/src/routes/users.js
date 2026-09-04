@@ -7,6 +7,19 @@ const ADMIN_ROLES = [
   "SupervisorGeneral", "DeputySupervisor",
   "Chairperson", "ExecutiveDeputyChair",
 ];
+const DEFAULT_GRADE = "八上";
+const VALID_GRADES = ["七上", "七下", "八上", "八下", "九上", "九下"];
+
+async function getDefaultGrade(env) {
+  try {
+    const config = await env.DB.prepare(
+      "SELECT config_value FROM system_config WHERE config_key = 'default_grade'"
+    ).first();
+    return VALID_GRADES.includes(config?.config_value) ? config.config_value : DEFAULT_GRADE;
+  } catch {
+    return DEFAULT_GRADE;
+  }
+}
 
 /** GET /api/users —— 用户列表 */
 export async function handleListUsers(request, env) {
@@ -108,6 +121,11 @@ export async function handleListLogs(request, env) {
   return jsonResponse(results);
 }
 
+/** GET /api/config/public —— 获取访客需要的公开配置 */
+export async function handleGetPublicConfig(request, env) {
+  return jsonResponse({ defaultGrade: await getDefaultGrade(env) });
+}
+
 /** GET /api/config —— 获取系统配置（Chairperson / ExecutiveDeputyChair） */
 export async function handleGetConfig(request, env) {
   const auth = await withAuth(request, env);
@@ -127,16 +145,49 @@ export async function handleGetConfig(request, env) {
     records: recordCount.count,
     materials: materialCount.count,
     roles: ADMIN_ROLES,
+    defaultGrade: await getDefaultGrade(env),
   });
+}
+
+/** PUT /api/config —— 更新系统配置（Chairperson / ExecutiveDeputyChair） */
+export async function handleUpdateConfig(request, env) {
+  const auth = await withAuth(request, env);
+  if (auth.error) return errorResponse(auth.error, auth.status);
+
+  if (auth.user.role !== "Chairperson" && auth.user.role !== "ExecutiveDeputyChair") {
+    return errorResponse("权限不足", 403);
+  }
+
+  const body = await parseBody(request);
+  if (!body || !VALID_GRADES.includes(body.defaultGrade)) {
+    return errorResponse("默认年级无效", 400);
+  }
+
+  await env.DB.prepare(
+    "INSERT OR REPLACE INTO system_config (config_key, config_value, updated_at) VALUES ('default_grade', ?, datetime('now'))"
+  ).bind(body.defaultGrade).run();
+
+  await createAuditLog(
+    env.DB,
+    auth.user.id,
+    "update_config",
+    "config",
+    null,
+    `将首页默认年级更新为 ${body.defaultGrade}`
+  );
+
+  return jsonResponse({ message: "首页默认年级已更新", defaultGrade: body.defaultGrade });
 }
 
 /** 路由分发 */
 export async function handleUsersRoute(request, env, path) {
   const method = request.method;
 
+  if (method === "GET" && path === "/api/config/public") return handleGetPublicConfig(request, env);
   if (method === "GET" && path === "/api/users") return handleListUsers(request, env);
   if (method === "GET" && path === "/api/logs") return handleListLogs(request, env);
   if (method === "GET" && path === "/api/config") return handleGetConfig(request, env);
+  if (method === "PUT" && path === "/api/config") return handleUpdateConfig(request, env);
 
   const roleMatch = path.match(/^\/api\/users\/(\d+)\/role$/);
   if (roleMatch && method === "PUT") {

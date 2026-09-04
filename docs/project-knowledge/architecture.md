@@ -36,7 +36,7 @@ Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudf
 - 基础设施: `worker/src/utils.js`（JWT/PBKDF2/CORS）、`worker/src/middleware.js`（认证、权限、审计）
 
 ### Database (`worker/schema.sql`) — D1 (SQLite)
-- `users` / `records` / `characters` / `materials` / `audit_logs`
+- `users` / `records` / `characters` / `materials` / `audit_logs` / `system_config`
 
 调用方向: Frontend → API Worker → D1。前端不直接访问 D1，Worker 不主动推数据到前端。
 

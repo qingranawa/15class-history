@@ -8,8 +8,14 @@ export let currentDisplay = "zhengshi";
 export let currentGrade = "";
 export let currentLayout = "timeline"; // 'timeline' | 'grid'
 
-const DEFAULT_GRADE = "七下";
+const DEFAULT_GRADE = "八上";
 const LATEST_COUNT = 10;
+const VALID_GRADES = ["七上", "七下", "八上", "八下", "九上", "九下"];
+
+function getDefaultGrade() {
+    const configuredGrade = window.historyDefaultGrade;
+    return VALID_GRADES.includes(configuredGrade) ? configuredGrade : DEFAULT_GRADE;
+}
 
 // ---------- 人物排序状态 ----------
 export let currentCharacterSort = {
@@ -475,11 +481,11 @@ export function initControls() {
             setActiveMain(statsBtn);
             switchToStats();
         } else {
-            switchToGrade(DEFAULT_GRADE);
+            switchToGrade(getDefaultGrade());
         }
     } else {
         setActiveMain(zhengshiBtn);
-        switchToGrade(DEFAULT_GRADE);
+        switchToGrade(getDefaultGrade());
     }
 }
 

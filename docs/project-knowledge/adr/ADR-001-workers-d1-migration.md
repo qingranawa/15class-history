@@ -26,4 +26,4 @@ status: Accepted
 - D1 免费额度 (5GB storage, 5M reads/day) 远超项目需求
 - 前端 data.js 保留为回退层，API 故障时网站仍可浏览
 - 新增 worker/ 目录，`wrangler deploy` 一键部署
-- 迁移脚本 `migration-add-organized.sql` 处理 schema 变更
+- 迁移脚本 `migration-add-organized.sql`、`migration-add-system-config.sql` 处理 schema 变更

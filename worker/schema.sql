@@ -77,6 +77,16 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- ===================== 系统配置 =====================
+CREATE TABLE IF NOT EXISTS system_config (
+    config_key TEXT PRIMARY KEY,
+    config_value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+INSERT OR IGNORE INTO system_config (config_key, config_value)
+VALUES ('default_grade', '八上');
+
 -- ===================== 索引 =====================
 CREATE INDEX IF NOT EXISTS idx_records_type ON records(type);
 CREATE INDEX IF NOT EXISTS idx_records_grade ON records(grade);

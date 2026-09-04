@@ -124,6 +124,16 @@ async function loadDataFromAPI() {
   }
 }
 
+/** 加载首页默认年级配置，API 不可用时由 controls.js 使用本地默认值 */
+async function loadSiteConfig() {
+  try {
+    const config = await apiFetch("/config/public");
+    window.historyDefaultGrade = config.defaultGrade;
+  } catch (err) {
+    console.warn("首页配置加载失败，使用本地默认值:", err.message);
+  }
+}
+
 /** 从后端登录 */
 async function loginViaAPI(username, password) {
   const data = await apiFetch("/auth/login", {
@@ -191,13 +201,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /** 初始化网站（加载数据 + 启动应用） */
   async function initSite(user, isDev) {
-    modal.classList.add("hidden");
-    mainContent.classList.remove("hidden");
-    showWelcomeMessage(user.username, user.role, isDev);
+    modal?.classList.add("hidden");
+    mainContent?.classList.remove("hidden");
+    if (user) showWelcomeMessage(user.username, user.role, isDev);
 
     // 优先从 API 加载数据，失败则使用静态数据
     if (!isDev) {
-      await loadDataFromAPI();
+      await Promise.all([loadDataFromAPI(), loadSiteConfig()]);
     }
 
     if (typeof window.initHistory === "function") {
@@ -211,10 +221,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // 自动登录
+  // 先以访客身份打开首页，不再强制等待登录
+  initSite(null, false);
+
+  // 已有登录态时继续自动识别，并恢复登录用户专属入口
   autoLogin().then((user) => {
     if (user) {
-      initSite(user, false);
+      showWelcomeMessage(user.username, user.role, false);
+      const submitBtn = document.getElementById("submitBtn");
+      if (submitBtn) submitBtn.style.display = "";
     }
   });
 

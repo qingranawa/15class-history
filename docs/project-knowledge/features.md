@@ -41,8 +41,8 @@ triggered_by_plan: null
 **References** — architecture.md §Layering
 
 #### 用户与权限管理
-**Enables** — 管理员管理用户账号、修改角色、查看操作日志和系统配置统计。
-**Actors / Entry Points** — SupervisorGeneral+ → `GET/PUT/DELETE /api/users`; Chairperson/EDC → `GET /api/logs`, `GET /api/config`
+**Enables** — 管理员管理用户账号、修改角色、查看操作日志和系统配置统计，并设置首页默认年级。
+**Actors / Entry Points** — SupervisorGeneral+ → `GET/PUT/DELETE /api/users`; Chairperson/EDC → `GET /api/logs`, `GET/PUT /api/config`; 访客 → `GET /api/config/public`
 **Capability Boundary** — 7 角色权限层级，含特殊规则：DeputySupervisor 不可操作 SupervisorGeneral 账号，ExecutiveDeputyChair 不可操作 Chairperson 账号。
 **References** — architecture.md §Layering
 

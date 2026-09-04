@@ -114,23 +114,24 @@ function buildNav() {
 
   items.push({ id: "dashboard", icon: "📊", label: "工作台" });
 
-  if (isAtLeast("MaterialCollector")) {
-    items.push({ id: "materials", icon: "📁", label: "素材资料" });
-  }
-  if (isAtLeast("DraftWriter")) {
-    items.push({ id: "drafts", icon: "✍️", label: "史事稿件" });
-  }
-  if (isAtLeast("Reviewer")) {
-    items.push({ id: "review", icon: "🔍", label: "待审稿件", badge: true });
-  }
   if (isAtLeast("SupervisorGeneral")) {
     items.push({ id: "records", icon: "📜", label: "全部史事" });
-    items.push({ id: "characters", icon: "👥", label: "人物管理" });
-    items.push({ id: "users", icon: "👤", label: "委员管理" });
+  }
+  if (isAtLeast("MaterialCollector")) {
+    items.push({ id: "materials", icon: "📁", label: "素材" });
+  }
+  if (isAtLeast("DraftWriter")) {
+    items.push({ id: "drafts", icon: "✍️", label: "草稿" });
+  }
+  if (isAtLeast("Reviewer")) {
+    items.push({ id: "review", icon: "🔍", label: "待审核", badge: true });
+  }
+  if (isAtLeast("SupervisorGeneral")) {
+    items.push({ id: "characters", icon: "👥", label: "全部人物" });
+    items.push({ id: "users", icon: "👤", label: "职员管理" });
   }
   if (currentUser.role === "Chairperson" || currentUser.role === "ExecutiveDeputyChair") {
-    items.push({ id: "logs", icon: "📋", label: "操作日志" });
-    items.push({ id: "config", icon: "⚙️", label: "系统配置" });
+    items.push({ id: "system", icon: "⚙️", label: "系统" });
   }
 
   nav.innerHTML = items.map(i =>
@@ -158,8 +159,7 @@ function navigate(view) {
     case "records": renderRecords(main); break;
     case "characters": renderCharacters(main); break;
     case "users": renderUsers(main); break;
-    case "logs": renderLogs(main); break;
-    case "config": renderConfig(main); break;
+    case "system": renderSystem(main); break;
   }
 }
 
@@ -230,10 +230,10 @@ async function renderDashboard(main) {
   }
 }
 
-// ===================== 视图：素材资料 =====================
+// ===================== 视图：素材 =====================
 async function renderMaterials(main) {
   const isMaterialCollector = currentUser.role === "MaterialCollector";
-  main.innerHTML = `<h1>📁 素材资料</h1>
+  main.innerHTML = `<h1>📁 素材</h1>
     <p class="subtitle">${isAtLeast("DraftWriter") ? "查看所有参考资料" : isMaterialCollector ? "整理用户投稿，标记已采用供执笔委员使用" : "管理已提交的素材"}</p>
     ${isMaterialCollector ? "<div class=\"card\" style=\"padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)\">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>" : ""}
     <div class="btn-group" style="margin-bottom:16px">
@@ -392,9 +392,9 @@ async function deleteMaterial(id) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-// ===================== 视图：史事稿件（DraftWriter） =====================
+// ===================== 视图：草稿（DraftWriter） =====================
 async function renderDrafts(main) {
-  main.innerHTML = `<h1>✍️ 史事稿件</h1><p class="subtitle">撰写和管理史事内容</p>
+  main.innerHTML = `<h1>✍️ 草稿</h1><p class="subtitle">撰写和管理草稿与退回稿件</p>
     <div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">
       📋 <strong>工作流</strong>：新建稿件 → 编辑内容 → <span style="color:#f59e0b">提交审核</span> → 审定委员审核 → <span style="color:#22c55e">通过发布</span> / <span style="color:#ef4444">驳回修改</span>
       ${currentUser.role === "DraftWriter" ? "<br>💡 提示：写完稿件后别忘了点 <span style=\"color:#f59e0b\">提交审核</span>，否则审定委员看不到！" : ""}
@@ -402,10 +402,8 @@ async function renderDrafts(main) {
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateDraftModal()">✍️ 新建稿件</button>
       <select id="draftStatusFilter" onchange="renderDrafts(document.getElementById('mainContent'))" style="margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)">
-        <option value="">全部状态</option>
+        <option value="">草稿与退回</option>
         <option value="draft">草稿</option>
-        <option value="pending_review">待审核</option>
-        <option value="approved">已通过</option>
         <option value="rejected">已驳回</option>
       </select>
     </div>
@@ -416,17 +414,15 @@ async function renderDrafts(main) {
     let url = "/records";
     const params = [];
     if (filterStatus) params.push(`status=${filterStatus}`);
-    // DraftWriter 看到自己的草稿+所有非草稿
-    if (currentUser.role === "DraftWriter" && !filterStatus) {
-      // 默认看自己的所有稿件
-    }
     if (params.length) url += "?" + params.join("&");
 
     const records = await api(url);
-    let filtered = records;
-    // DraftWriter 默认只显示自己的草稿 + 所有已审核
-    if (currentUser.role === "DraftWriter" && !filterStatus) {
-      filtered = records.filter(r => r.author_id === currentUser.id || r.status === "approved");
+    let filtered = filterStatus
+      ? records
+      : records.filter(r => r.status === "draft" || r.status === "rejected");
+    // 执笔委员只查看自己的草稿和退回稿件
+    if (currentUser.role === "DraftWriter") {
+      filtered = filtered.filter(r => r.author_id === currentUser.id);
     }
 
     const container = document.getElementById("draftsList");
@@ -579,9 +575,9 @@ async function submitReview(id) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-// ===================== 视图：待审稿件（Reviewer） =====================
+// ===================== 视图：待审核（Reviewer） =====================
 async function renderReview(main) {
-  main.innerHTML = `<h1>🔍 待审稿件</h1><p class="subtitle">审核执笔委员提交的史事稿件</p>
+  main.innerHTML = `<h1>🔍 待审核</h1><p class="subtitle">审核执笔委员提交的史事稿件</p>
     <div id="reviewList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
@@ -638,11 +634,11 @@ function showRejectModal(id) {
 
 // ===================== 视图：全部史事（SupervisorGeneral+） =====================
 async function renderRecords(main) {
-  main.innerHTML = `<h1>📜 全部史事</h1><p class="subtitle">管理所有史事记录</p>
+  main.innerHTML = `<h1>📜 全部史事</h1><p class="subtitle">仅显示已审核发布的史事记录</p>
     <div id="recordsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
-    const records = await api("/records");
+    const records = await api("/records?status=approved");
     const container = document.getElementById("recordsList");
     if (records.length === 0) {
       container.innerHTML = "<div class=\"empty-state\"><div class=\"icon\">📭</div><p>暂无史事</p></div>";
@@ -650,14 +646,13 @@ async function renderRecords(main) {
     }
     container.innerHTML = `
       <table class="admin-table">
-        <thead><tr><th>ID</th><th>标题</th><th>学期</th><th>类型</th><th>状态</th><th>作者</th><th>操作</th></tr></thead>
+        <thead><tr><th>ID</th><th>标题</th><th>学期</th><th>类型</th><th>作者</th><th>操作</th></tr></thead>
         <tbody>${records.map(r => `
           <tr>
             <td>${r.id}</td>
             <td><strong>${escHtml(r.title)}</strong></td>
             <td>${escHtml(r.grade)}</td>
             <td>${typeLabel(r.type)}</td>
-            <td>${statusBadge(r.status)}</td>
             <td>${escHtml(r.author_name || "")}</td>
             <td>
               <div class="btn-group">
@@ -683,9 +678,9 @@ async function deleteRecord(id) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-// ===================== 视图：人物管理 =====================
+// ===================== 视图：全部人物 =====================
 async function renderCharacters(main) {
-  main.innerHTML = `<h1>👥 人物管理</h1><p class="subtitle">管理班级史记相关人物档案</p>
+  main.innerHTML = `<h1>👥 全部人物</h1><p class="subtitle">管理班级史记相关人物档案</p>
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateCharModal()">➕ 添加人物</button>
     </div>
@@ -796,9 +791,9 @@ async function deleteChar(id) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-// ===================== 视图：委员管理 =====================
+// ===================== 视图：职员管理 =====================
 async function renderUsers(main) {
-  main.innerHTML = `<h1>👤 委员管理</h1><p class="subtitle">管理编纂委员会成员账号</p>
+  main.innerHTML = `<h1>👤 职员管理</h1><p class="subtitle">管理编纂委员会成员账号</p>
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateUserModal()">➕ 添加委员</button>
     </div>
@@ -894,9 +889,21 @@ async function deleteUser(userId, username) {
   } catch (err) { toast(err.message, "error"); }
 }
 
-// ===================== 视图：操作日志 =====================
-async function renderLogs(main) {
-  main.innerHTML = `<h1>📋 操作日志</h1><p class="subtitle">系统操作审计记录（仅主任/常务副主任可查看）</p>
+// ===================== 视图：系统 =====================
+async function renderSystem(main) {
+  main.innerHTML = `<h1>⚙️ 系统</h1><p class="subtitle">系统开关、站点配置与操作审计</p>
+    <section class="system-section" id="systemConfigPanel"></section>
+    <section class="system-section" id="systemLogsPanel"></section>`;
+
+  await Promise.all([
+    renderSystemConfig(document.getElementById("systemConfigPanel")),
+    renderSystemLogs(document.getElementById("systemLogsPanel")),
+  ]);
+}
+
+// ===================== 系统：操作日志 =====================
+async function renderSystemLogs(main) {
+  main.innerHTML = `<h2 class="system-section__title">📋 操作日志</h2><p class="system-section__description">系统操作审计记录</p>
     <div id="logsList"><p style="color:var(--admin-muted)">加载中...</p></div>`;
 
   try {
@@ -929,16 +936,19 @@ function actionLabel(a) {
     "create_record":"创建史事", "update_record":"更新史事", "delete_record":"删除史事",
     "submit_review":"提交审核", "approve_record":"审核通过", "reject_record":"审核驳回",
     "create_character":"创建人物", "update_character":"更新人物", "delete_character":"删除人物",
-    "create_material":"上传素材", "update_material":"修改素材", "delete_material":"删除素材" };
+    "create_material":"上传素材", "update_material":"修改素材", "delete_material":"删除素材",
+    "update_config":"更新系统配置" };
   return map[a] || a;
 }
 
-// ===================== 视图：系统配置 =====================
-async function renderConfig(main) {
-  main.innerHTML = "<h1>⚙️ 系统配置</h1><p class=\"subtitle\">系统统计与配置信息（仅主任/常务副主任可查看）</p>";
+// ===================== 系统：配置 =====================
+async function renderSystemConfig(main) {
+  main.innerHTML = "<h2 class=\"system-section__title\">🔧 系统配置</h2><p class=\"system-section__description\">系统统计、首页默认年级与权限信息</p>";
 
   try {
     const config = await api("/config");
+    const grades = ["七上", "七下", "八上", "八下", "九上", "九下"];
+    const defaultGrade = grades.includes(config.defaultGrade) ? config.defaultGrade : "八上";
     main.innerHTML += `
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-value">${config.users}</div><div class="stat-label">注册用户</div></div>
@@ -967,8 +977,55 @@ async function renderConfig(main) {
         </table>
       </div>
     `;
+    const gradeOptions = grades.map((grade) =>
+      "<option value=\"" + grade + "\"" + (grade === defaultGrade ? " selected" : "") + ">" + grade + "</option>"
+    ).join("");
+    main.insertAdjacentHTML(
+      "beforeend",
+      [
+        "<div class=\"card\">",
+        "<h3>🏫 首页默认年级</h3>",
+        "<p class=\"default-grade-setting__hint\">访客打开首页且未指定年级时，将默认进入这里设置的年级。</p>",
+        "<div class=\"default-grade-setting__controls\">",
+        "<select id=\"defaultGradeSelect\" class=\"default-grade-setting__select\">",
+        gradeOptions,
+        "</select>",
+        "<button class=\"btn btn-primary\" id=\"saveDefaultGradeBtn\">保存默认年级</button>",
+        "<span id=\"defaultGradeStatus\" class=\"default-grade-setting__status\"></span>",
+        "</div>",
+        "</div>",
+      ].join("")
+    );
+    document.getElementById("saveDefaultGradeBtn").addEventListener("click", saveDefaultGrade);
   } catch (err) {
     main.innerHTML += `<div class="card"><p style="color:var(--admin-danger)">加载失败: ${err.message}</p></div>`;
+  }
+}
+
+async function saveDefaultGrade() {
+  const select = document.getElementById("defaultGradeSelect");
+  const button = document.getElementById("saveDefaultGradeBtn");
+  const status = document.getElementById("defaultGradeStatus");
+  if (!select || !button || !status) return;
+
+  button.disabled = true;
+  status.textContent = "保存中...";
+  status.classList.remove("default-grade-setting__status--error");
+  status.classList.add("default-grade-setting__status--pending");
+  try {
+    await api("/config", {
+      method: "PUT",
+      body: JSON.stringify({ defaultGrade: select.value }),
+    });
+    status.textContent = "已保存为 " + select.value;
+    status.classList.remove("default-grade-setting__status--pending");
+    toast("首页默认年级已更新为 " + select.value, "success");
+  } catch (err) {
+    status.textContent = err.message;
+    status.classList.remove("default-grade-setting__status--pending");
+    status.classList.add("default-grade-setting__status--error");
+  } finally {
+    button.disabled = false;
   }
 }
 

@@ -118,6 +118,21 @@ body {
 .admin-main h1 { font-size: 24px; margin-bottom: 8px; }
 .admin-main .subtitle { color: var(--admin-muted); font-size: 14px; margin-bottom: 24px; }
 
+.system-section {
+  margin-bottom: 28px;
+}
+
+.system-section__title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.system-section__description {
+  color: var(--admin-muted);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
 /* ===== 卡片 ===== */
 .card {
   background: var(--admin-card);
@@ -128,6 +143,41 @@ body {
 }
 
 .card h3 { font-size: 16px; margin-bottom: 16px; }
+
+.default-grade-setting__hint {
+  color: var(--admin-muted);
+  font-size: 13px;
+  margin: 8px 0 14px;
+}
+
+.default-grade-setting__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.default-grade-setting__select {
+  padding: 9px 12px;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  color: var(--admin-text);
+  font: inherit;
+}
+
+.default-grade-setting__status {
+  color: var(--admin-success);
+  font-size: 13px;
+}
+
+.default-grade-setting__status--pending {
+  color: var(--admin-muted);
+}
+
+.default-grade-setting__status--error {
+  color: var(--admin-danger);
+}
 
 /* ===== 统计小卡片 ===== */
 .stats-grid {
