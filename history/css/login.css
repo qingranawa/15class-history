@@ -2,6 +2,7 @@
 
 .login-page {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -130,4 +131,73 @@
     .login-card {
         padding: 28px 22px;
     }
+}
+
+/* ===== 数字博物馆覆盖 ===== */
+.login-card {
+    margin-top: 0;
+    background: var(--museum-surface);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.login-card__back {
+    color: var(--museum-accent);
+}
+
+.login-card__back:hover {
+    color: #8f2f22;
+}
+
+.login-card h1 {
+    color: var(--museum-ink);
+}
+
+.login-card__intro,
+.login-form label {
+    color: var(--museum-ink-soft);
+}
+
+.login-tabs {
+    border-bottom-color: var(--museum-line);
+}
+
+.login-tab {
+    color: var(--museum-muted);
+}
+
+.login-tab:hover,
+.login-tab[aria-selected="true"] {
+    color: var(--museum-accent);
+}
+
+.login-tab[aria-selected="true"] {
+    border-bottom-color: var(--museum-accent);
+}
+
+.login-form input {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-ink);
+}
+
+.login-form input:focus {
+    border-color: var(--museum-accent);
+    box-shadow: 0 0 0 3px var(--museum-accent-soft);
+}
+
+.login-form button {
+    background: var(--museum-accent);
+    border-radius: var(--radius-md);
+    color: #fff;
+}
+
+.login-form button:hover {
+    background: #8f2f22;
+}
+
+.login-form__hint {
+    color: var(--museum-muted);
 }

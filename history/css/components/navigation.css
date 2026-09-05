@@ -1,17 +1,18 @@
 /* ===== components/navigation.css ===== */
 /* 页面导航栏、主类别导航、年级子菜单 */
 
-/* 页面导航栏 */
+/* 全宽站点导航 */
 .page-nav {
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
     margin-bottom: 32px;
     padding: 0;
-    background: rgba(11, 12, 14, 0.92);
+    background: rgba(255, 255, 255, 0.94);
     border: none;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--museum-line);
     border-radius: 0;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -20,8 +21,12 @@
 .page-nav__links {
     display: flex;
     align-items: stretch;
-    width: 100%;
-    min-width: max-content;
+    width: min(100%, 1280px);
+    box-sizing: border-box;
+    min-height: 64px;
+    margin: 0 auto;
+    padding: 0 24px;
+    min-width: 0;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -32,16 +37,16 @@
 
 .nav-btn {
     flex: 1 1 0;
-    min-width: 132px;
+    min-width: 112px;
     background: transparent;
     color: var(--text-secondary);
     border: none;
     border-bottom: 2px solid transparent;
     border-radius: 0;
-    padding: 15px 18px 13px;
+    padding: 19px 16px 17px;
     font-size: 0.9rem;
     font-weight: 500;
-    transition: var(--transition);
+    transition: color var(--duration-normal) var(--ease-out), background-color var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -55,7 +60,7 @@
     background: var(--accent-dim);
     color: var(--accent);
     transform: none;
-    border-bottom-color: var(--border-glow);
+    border-bottom-color: var(--museum-accent);
 }
 
 .nav-btn:focus-visible {
@@ -70,7 +75,7 @@
 .page-nav__link[aria-current="page"] {
     color: var(--accent);
     border-bottom-color: var(--accent);
-    background: var(--accent-dim);
+    background: transparent;
 }
 
 /* 主类别导航 */
@@ -184,6 +189,12 @@
         min-width: 116px;
         padding: 13px 12px 11px;
         font-size: 0.8rem;
+    }
+
+    .page-nav__links {
+        width: 100%;
+        min-width: 0;
+        padding: 0 16px;
     }
 
     .layout-toggle-btn {

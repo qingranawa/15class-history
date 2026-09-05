@@ -235,7 +235,7 @@ async function renderMaterials(main) {
   const isMaterialCollector = currentUser.role === "MaterialCollector";
   main.innerHTML = `<h1>📁 素材</h1>
     <p class="subtitle">${isAtLeast("DraftWriter") ? "查看所有参考资料" : isMaterialCollector ? "整理用户投稿，标记已采用供执笔委员使用" : "管理已提交的素材"}</p>
-    ${isMaterialCollector ? "<div class=\"card\" style=\"padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)\">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>" : ""}
+    ${isMaterialCollector ? "<div class=\"card\" style=\"padding:12px 16px;margin-bottom:16px;background:rgba(163,58,42,0.08);border-color:rgba(163,58,42,0.3);font-size:13px;color:var(--admin-muted)\">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>" : ""}
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateMaterialModal()">📤 上传新素材</button>
       ${isMaterialCollector ? "<select id=\"matStatusFilter\" onchange=\"renderMaterials(document.getElementById('mainContent'))\" style=\"margin-left:8px;padding:8px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text)\"><option value=\"\">全部状态</option><option value=\"submitted\">待整理</option><option value=\"organized\">已整理</option><option value=\"in_use\">已采用</option><option value=\"archived\">已归档</option></select>" : ""}
@@ -395,7 +395,7 @@ async function deleteMaterial(id) {
 // ===================== 视图：草稿（DraftWriter） =====================
 async function renderDrafts(main) {
   main.innerHTML = `<h1>✍️ 草稿</h1><p class="subtitle">撰写和管理草稿与退回稿件</p>
-    <div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);font-size:13px;color:var(--admin-muted)">
+    <div class="card" style="padding:12px 16px;margin-bottom:16px;background:rgba(163,58,42,0.08);border-color:rgba(163,58,42,0.3);font-size:13px;color:var(--admin-muted)">
       📋 <strong>工作流</strong>：新建稿件 → 编辑内容 → <span style="color:#f59e0b">提交审核</span> → 审定委员审核 → <span style="color:#22c55e">通过发布</span> / <span style="color:#ef4444">驳回修改</span>
       ${currentUser.role === "DraftWriter" ? "<br>💡 提示：写完稿件后别忘了点 <span style=\"color:#f59e0b\">提交审核</span>，否则审定委员看不到！" : ""}
     </div>
@@ -983,7 +983,7 @@ async function renderSystemConfig(main) {
     main.insertAdjacentHTML(
       "beforeend",
       [
-        "<div class=\"card\">",
+        "<div class=\"card system-default-grade-card\">",
         "<h3>🏫 首页默认年级</h3>",
         "<p class=\"default-grade-setting__hint\">访客打开首页且未指定年级时，将默认进入这里设置的年级。</p>",
         "<div class=\"default-grade-setting__controls\">",

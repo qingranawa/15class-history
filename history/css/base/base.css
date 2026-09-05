@@ -1,24 +1,49 @@
 /* ===== base.css ===== */
 /* 用途：CSS 变量定义、重置默认样式、全局基础排版 */
 
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;600;700;900&display=swap");
+
 :root {
-    --bg-primary: #0b0c0e;
-    --bg-secondary: #111316;
-    --card-bg: rgba(18, 22, 28, 0.85);
-    --accent: #c9a959;
-    --accent-light: #e0c47a;
-    --accent-dim: rgba(201, 169, 89, 0.15);
-    --text-primary: #e6e9f0;
-    --text-secondary: #9aa1af;
-    --text-muted: #6b7380;
-    --border-light: rgba(201, 169, 89, 0.25);
-    --border-glow: rgba(201, 169, 89, 0.4);
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
-    --font-serif: "Times New Roman", "Songti SC", "SimSong", serif;
-    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-    --transition: 0.25s ease;
+    --museum-paper: #f4f4f1;
+    --museum-surface: #ffffff;
+    --museum-surface-muted: #ecece7;
+    --museum-ink: #171714;
+    --museum-ink-soft: #44453f;
+    --museum-muted: #686963;
+    --museum-line: #d6d6cf;
+    --museum-line-strong: #b8b8af;
+    --museum-accent: #a33a2a;
+    --museum-accent-soft: #f1e4df;
+    --museum-success: #2f6b4c;
+    --museum-warning: #965c18;
+    --museum-danger: #a33a2a;
+    --font-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    --font-ui: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration-fast: 160ms;
+    --duration-normal: 220ms;
+
+    /* 旧变量兼容别名，逐步迁移组件时保持现有功能 */
+    --bg-primary: var(--museum-paper);
+    --bg-secondary: var(--museum-surface-muted);
+    --card-bg: var(--museum-surface);
+    --accent: var(--museum-accent);
+    --accent-light: #bd5b4c;
+    --accent-dim: var(--museum-accent-soft);
+    --text-primary: var(--museum-ink);
+    --text-secondary: var(--museum-ink-soft);
+    --text-muted: var(--museum-muted);
+    --border-light: var(--museum-line);
+    --border-glow: var(--museum-accent);
+    --shadow-sm: 0 2px 8px rgba(23, 23, 20, 0.08);
+    --shadow-md: 0 6px 18px rgba(23, 23, 20, 0.1);
+    --shadow-lg: 0 10px 28px rgba(23, 23, 20, 0.12);
+    --font-serif: var(--font-display);
+    --font-sans: var(--font-ui);
+    --transition: var(--duration-normal) var(--ease-out);
 }
 
 * {
@@ -28,33 +53,19 @@
 }
 
 body {
-    background-color: var(--bg-primary);
-    background-image: radial-gradient(circle at 30% 20%, rgba(201, 169, 89, 0.03) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(201, 169, 89, 0.02) 0%, transparent 50%);
+    background-color: var(--museum-paper);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    line-height: 1.7;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 /* 优雅星空效果（极简） */
 body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    background-image: radial-gradient(1px 1px at 10% 15%, rgba(255, 255, 240, 0.4) 1px, transparent 1px),
-        radial-gradient(1px 1px at 45% 60%, rgba(255, 255, 240, 0.3) 1px, transparent 1px),
-        radial-gradient(1.5px 1.5px at 80% 30%, rgba(201, 169, 89, 0.3) 1px, transparent 1px);
-    background-size: 180px 180px, 250px 250px, 200px 200px;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.4;
+    display: none;
 }
 
 h1,
@@ -64,6 +75,7 @@ h4 {
     font-family: var(--font-serif);
     font-weight: 500;
     letter-spacing: 0.02em;
+    text-wrap: balance;
 }
 
 a,

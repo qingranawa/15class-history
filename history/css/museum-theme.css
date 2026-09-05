@@ -1,0 +1,905 @@
+/* ===== 数字博物馆公共主题层 ===== */
+
+body {
+    background: var(--museum-paper);
+    color: var(--museum-ink);
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+    align-items: end;
+    gap: 64px;
+    max-width: 1180px;
+    margin: 0 auto 44px;
+    padding: 76px 0 54px;
+    text-align: left;
+    border-bottom: 1px solid var(--museum-line);
+}
+
+.hero__eyebrow {
+    display: block;
+    margin-bottom: 20px;
+    color: var(--museum-accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+}
+
+.hero h1 {
+    margin-bottom: 14px;
+    color: var(--museum-ink);
+    font-family: var(--font-display);
+    font-size: clamp(3.8rem, 9vw, 7rem);
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 1;
+}
+
+.hero p {
+    color: var(--museum-muted);
+    font-size: 1rem;
+    font-style: normal;
+    letter-spacing: 0;
+}
+
+.hero__aside {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: 16px;
+    border-left: 1px solid var(--museum-line-strong);
+    padding-left: 32px;
+}
+
+.hero__aside-label {
+    color: var(--museum-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hero__aside strong {
+    color: var(--museum-accent);
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+}
+
+.hero__aside p {
+    grid-column: 1 / -1;
+    margin-top: 16px;
+    color: var(--museum-ink-soft);
+    line-height: 1.8;
+}
+
+.container {
+    color: var(--museum-ink);
+}
+
+.info-page__content,
+.login-card {
+    background: var(--museum-surface);
+    border-color: var(--museum-line);
+    box-shadow: var(--shadow-sm);
+}
+
+.info-page__content h1,
+.info-page__content h2,
+.login-card h1 {
+    color: var(--museum-ink);
+}
+
+.info-page__content h2 {
+    border-top: 1px solid var(--museum-line);
+    padding-top: 22px;
+}
+
+.info-page__content h2:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.info-page__content p,
+.info-page__content li,
+.login-card__intro,
+.login-form label {
+    color: var(--museum-ink-soft);
+}
+
+.info-page__note {
+    color: var(--museum-accent) !important;
+}
+
+.info-page__link,
+.login-card__back {
+    color: var(--museum-accent);
+}
+
+.info-contact-card {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+}
+
+.info-contact-card__name {
+    color: var(--museum-accent);
+}
+
+.info-contact-card__wechat {
+    color: var(--museum-ink);
+}
+
+.info-submit-form input,
+.info-submit-form textarea,
+.login-form input {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    color: var(--museum-ink);
+}
+
+.info-submit-form button,
+.login-form button {
+    background: var(--museum-accent);
+    color: #fff;
+}
+
+.info-submit-form button:hover,
+.login-form button:hover {
+    background: #8f2f22;
+}
+
+.function-bar {
+    margin: 0 0 36px;
+}
+
+.welcome-message {
+    max-width: 520px;
+    margin: 24px auto 32px;
+    background: var(--museum-accent-soft);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-accent);
+}
+
+.search-trigger-box {
+    min-height: 48px;
+    padding: 11px 16px;
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-muted);
+    box-shadow: none;
+}
+
+.search-trigger-box:hover {
+    background: var(--museum-surface);
+    border-color: var(--museum-accent);
+    color: var(--museum-ink);
+    box-shadow: none;
+}
+
+.random-section button,
+.random-trigger-btn {
+    min-height: 48px;
+    padding: 10px 20px;
+    background: var(--museum-accent);
+    color: #fff;
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.random-section button:hover,
+.random-trigger-btn:hover {
+    background: #8f2f22;
+    box-shadow: none;
+}
+
+.extra-categories {
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 28px 0 14px;
+}
+
+.extra-btn {
+    background: transparent;
+    color: var(--museum-ink-soft);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+.extra-btn:hover {
+    background: var(--museum-accent-soft);
+    border-color: var(--museum-accent);
+    color: var(--museum-accent);
+    transform: none;
+}
+
+.extra-btn.active {
+    background: var(--museum-accent);
+    border-color: var(--museum-accent);
+    color: #fff;
+    box-shadow: none;
+    animation: none;
+}
+
+.grade-submenu {
+    margin: 4px 0 28px;
+    padding-top: 14px;
+    text-align: left;
+}
+
+.grade-submenu::before {
+    width: 48px;
+    margin: 0 0 12px;
+    background: var(--museum-line-strong);
+    opacity: 1;
+}
+
+.grade-buttons {
+    justify-content: flex-start;
+    gap: 4px;
+}
+
+.grade-btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--museum-muted);
+}
+
+.grade-btn:hover {
+    background: var(--museum-accent-soft);
+    color: var(--museum-accent);
+}
+
+.grade-btn.active {
+    color: var(--museum-accent);
+    border-bottom-color: var(--museum-accent);
+    background: transparent;
+}
+
+.record-sort-container,
+.character-sort-container {
+    padding: 8px 0;
+}
+
+.record-sort-container select,
+.character-sort-container select,
+.sort-order-btn,
+.layout-toggle-btn {
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-ink-soft);
+}
+
+.record-sort-container select option,
+.character-sort-container select option {
+    background: var(--museum-surface);
+    color: var(--museum-ink);
+}
+
+.sort-order-btn:hover,
+.layout-toggle-btn:hover {
+    background: var(--museum-accent-soft);
+    border-color: var(--museum-accent);
+    color: var(--museum-accent);
+}
+
+.timeline {
+    max-width: 980px;
+}
+
+.timeline::before {
+    left: 28px;
+    width: 1px;
+    background: var(--museum-line-strong);
+}
+
+.timeline-event {
+    margin-bottom: 28px;
+}
+
+.timeline-event-icon {
+    left: 20px;
+    width: 17px;
+    height: 17px;
+    background: var(--museum-accent);
+    border-radius: 50%;
+    transform: none;
+    box-shadow: 0 0 0 4px var(--museum-accent-soft);
+}
+
+.timeline-event-copy {
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    padding: 28px 32px;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transition: border-color var(--duration-normal) var(--ease-out), background-color var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+}
+
+.timeline-event-copy.visible {
+    opacity: 1;
+}
+
+.timeline-event-copy:hover {
+    background: var(--museum-surface);
+    border-color: var(--museum-accent);
+    box-shadow: none !important;
+    transform: translateX(3px);
+}
+
+.timeline-event-thumbnail {
+    color: var(--museum-accent);
+    background: var(--museum-surface-muted);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-family: var(--font-ui);
+}
+
+.timeline-event-copy h3 {
+    color: var(--museum-ink);
+    font-size: 1.55rem;
+}
+
+.timeline-event-copy .content {
+    color: var(--museum-ink-soft);
+}
+
+.timeline-event-copy .honorific {
+    color: var(--museum-accent);
+    border-top-color: var(--museum-line);
+}
+
+.poem {
+    color: var(--museum-accent);
+    border-left: 1px solid var(--museum-accent);
+}
+
+.characters-grid {
+    gap: 16px;
+}
+
+.character-card {
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+.character-card:hover {
+    background: var(--museum-accent-soft);
+    border-color: var(--museum-accent);
+    transform: translateY(-2px);
+    box-shadow: none !important;
+}
+
+.char-name {
+    border-left: 1px solid var(--museum-accent);
+    padding-left: 10px;
+    color: var(--museum-accent);
+}
+
+.char-nicknames {
+    color: var(--museum-muted);
+}
+
+.char-desc {
+    color: var(--museum-ink-soft);
+}
+
+.stats-container {
+    max-width: 980px;
+}
+
+.stats-tabs {
+    justify-content: flex-start;
+    gap: 4px;
+}
+
+.stats-tab {
+    border-radius: var(--radius-sm);
+    color: var(--museum-muted);
+}
+
+.stats-tab:hover {
+    background: var(--museum-accent-soft);
+    color: var(--museum-accent);
+}
+
+.stats-tab.active {
+    color: var(--museum-accent);
+    border-bottom-color: var(--museum-accent);
+    background: transparent;
+}
+
+.stats-charts {
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.graph-toggle-container {
+    justify-content: flex-start;
+    margin: 8px 0 20px;
+}
+
+.graph-toggle-btn {
+    color: var(--museum-muted);
+    border-radius: var(--radius-sm);
+}
+
+.graph-toggle-btn:hover {
+    background: var(--museum-accent-soft);
+    color: var(--museum-accent);
+}
+
+.history-modal .modal-overlay {
+    background: rgba(23, 23, 20, 0.45);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+.history-modal .modal-container {
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-left: 1px solid var(--museum-accent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.history-modal .modal-close-btn {
+    color: var(--museum-accent);
+}
+
+.detail-card h2,
+.notes-section h3,
+.related-chars-section h3,
+.related-records-section h3,
+.search-modal-header h3,
+.search-results-header h3,
+.random-record-display h4 {
+    color: var(--museum-accent);
+}
+
+.notes-content,
+#graphNetwork,
+.random-record-display,
+.result-item-compact,
+.search-result-item {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.random-record-display {
+    border-left: 1px solid var(--museum-accent);
+}
+
+.search-trigger-box input,
+.search-bar-inline .inner-search-input,
+.character-selector select,
+.date-input,
+.comment-input {
+    background: var(--museum-surface);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-ink);
+}
+
+.search-bar-inline .inner-search-input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--museum-accent) !important;
+    box-shadow: 0 0 0 3px var(--museum-accent-soft) !important;
+}
+
+.search-action-btn,
+.comment-submit-btn,
+.random-roll-btn {
+    border-radius: var(--radius-md);
+    box-shadow: none;
+}
+
+.search-action-btn.primary,
+.comment-submit-btn,
+.random-roll-btn {
+    background: var(--museum-accent);
+    color: #fff;
+}
+
+.search-action-btn.primary:hover,
+.comment-submit-btn:hover,
+.random-roll-btn:hover {
+    background: #8f2f22;
+    box-shadow: none;
+}
+
+.filter-option,
+.filter-btn {
+    border-radius: var(--radius-md);
+}
+
+.result-title-compact,
+.result-title {
+    color: var(--museum-accent);
+}
+
+.result-grade-tag,
+.result-grade {
+    background: var(--museum-accent-soft);
+    color: var(--museum-accent);
+    border-radius: var(--radius-sm);
+}
+
+.comment-form,
+.comment-item {
+    background: transparent;
+}
+
+.comment-item {
+    border-left: 1px solid var(--museum-line-strong);
+    border-radius: 0;
+}
+
+.comment-author {
+    color: var(--museum-accent);
+}
+
+.comment-text {
+    color: var(--museum-ink-soft);
+}
+
+footer {
+    border-top-color: var(--museum-line);
+}
+
+.back-to-top {
+    background: var(--museum-accent);
+    color: #fff;
+    box-shadow: none;
+}
+
+.back-to-top:hover {
+    background: #8f2f22;
+    box-shadow: none;
+}
+
+.skeleton-card {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+    animation: museum-skeleton-pulse 1.6s var(--ease-out) infinite;
+}
+
+@keyframes museum-skeleton-pulse {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.hero h1 {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--museum-ink);
+    animation: none;
+}
+
+@media (max-width: 600px) {
+    .hero {
+        display: block;
+        margin-bottom: 32px;
+        padding: 52px 0 36px;
+    }
+
+    .hero__aside {
+        margin-top: 36px;
+        padding-left: 20px;
+    }
+
+    .extra-categories {
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .extra-btn {
+        flex: 0 0 auto;
+    }
+
+    .timeline::before {
+        left: 20px;
+    }
+
+    .timeline-event-icon {
+        left: 12px;
+    }
+
+    .timeline-event-copy {
+        padding: 22px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timeline-event-copy,
+    .character-card,
+    .extra-btn,
+    .random-section button {
+        transition: none;
+    }
+}
+
+/* ===== 参考图式页面导航 ===== */
+.page-nav {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-bottom: 0;
+    background: rgba(247, 247, 245, 0.98);
+    border-bottom: 1px solid var(--museum-line);
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+.page-nav__links {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+    align-items: center;
+    width: 100%;
+    max-width: 1280px;
+    min-height: 80px;
+    margin: 0 auto;
+    padding: 0 44px;
+    gap: 24px;
+    overflow: visible;
+}
+
+.page-nav__brand {
+    justify-self: start;
+    color: var(--museum-ink);
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.page-nav__brand:hover {
+    color: var(--museum-accent);
+}
+
+.page-nav__primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    gap: 32px;
+}
+
+.page-nav__primary .nav-btn {
+    flex: 0 0 auto;
+    min-width: auto;
+    min-height: 44px;
+    padding: 12px 0 10px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    color: var(--museum-muted);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.page-nav__primary .nav-btn:hover {
+    background: transparent;
+    border-bottom-color: var(--museum-line-strong);
+    color: var(--museum-ink);
+    transform: none;
+}
+
+.page-nav__primary .nav-btn[aria-current="page"] {
+    background: transparent;
+    border-bottom-color: var(--museum-accent);
+    color: var(--museum-accent);
+}
+
+.page-nav__login {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    min-height: 52px;
+    padding: 12px 24px;
+    background: #1d1f1c;
+    border: 1px solid #1d1f1c;
+    border-radius: 11px;
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+    white-space: nowrap;
+}
+
+.page-nav__login:hover {
+    background: #30322f;
+    border-color: #30322f;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.page-nav__login:focus-visible {
+    outline: 2px solid var(--museum-accent);
+    outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+    .page-nav__links {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        min-height: 64px;
+        padding: 0 16px;
+        gap: 16px;
+    }
+
+    .page-nav__brand {
+        font-size: 16px;
+    }
+
+    .page-nav__primary {
+        justify-content: flex-start;
+        gap: 24px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .page-nav__primary::-webkit-scrollbar {
+        display: none;
+    }
+
+    .page-nav__primary .nav-btn {
+        font-size: 14px;
+    }
+
+    .page-nav__login {
+        min-width: 80px;
+        min-height: 44px;
+        padding: 10px 16px;
+        border-radius: 9px;
+        font-size: 15px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-nav__brand,
+    .page-nav__primary .nav-btn,
+    .page-nav__login {
+        transition: none;
+    }
+}
+
+/* ===== 关系图谱展示层 ===== */
+.graph-toggle-btn {
+    min-height: 42px;
+    padding: 9px 16px;
+    background: var(--museum-surface);
+    border: 1px solid var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-ink-soft);
+}
+
+.graph-toggle-btn:hover {
+    background: var(--museum-accent-soft);
+    border-color: var(--museum-accent);
+    color: var(--museum-accent);
+}
+
+.graph-modal .modal-container {
+    width: min(94vw, 960px);
+    max-width: 960px;
+    height: min(82vh, 760px);
+    max-height: 760px;
+    padding: 28px 32px 24px;
+}
+
+.graph-modal__header {
+    margin-bottom: 16px;
+}
+
+.graph-modal__eyebrow {
+    color: var(--museum-accent);
+}
+
+.graph-modal__header h3 {
+    color: var(--museum-ink);
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.graph-modal__description {
+    color: var(--museum-muted);
+}
+
+#graphNetwork {
+    min-height: 360px;
+    background: var(--museum-paper);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+}
+
+.graph-legend {
+    color: var(--museum-ink-soft);
+}
+
+.graph-legend-dot--node {
+    background: var(--museum-accent);
+    border-color: var(--museum-accent);
+}
+
+.graph-legend-dot--edge {
+    background: var(--museum-accent);
+}
+
+.graph-modal__actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.graph-modal__actions button {
+    min-height: 42px;
+    padding: 9px 16px;
+    border-radius: var(--radius-md);
+}
+
+.graph-empty {
+    color: var(--museum-muted);
+}
+
+@media (max-width: 600px) {
+    .graph-modal .modal-container {
+        width: calc(100vw - 24px);
+        height: calc(100dvh - 24px);
+        padding: 24px 18px 18px;
+    }
+
+    #graphNetwork {
+        min-height: 280px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .graph-toggle-btn,
+    .graph-modal__actions button {
+        transition: none;
+    }
+}

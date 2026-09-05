@@ -16,6 +16,38 @@ function getCharacters() {
     return typeof characters !== "undefined" ? characters : [];
 }
 
+function getNodeStyle(count) {
+    const isKeyNode = count >= 4;
+    return {
+        font: {
+            size: isKeyNode ? 26 : 22,
+            color: "#171714",
+            face: "Noto Sans SC",
+            strokeWidth: 0
+        },
+        color: {
+            background: isKeyNode ? "#f1e4df" : "#ffffff",
+            border: "#a33a2a",
+            highlight: {
+                background: "#ead1ca",
+                border: "#8f2f22"
+            }
+        }
+    };
+}
+
+function getEdgeStyle(count) {
+    return {
+        width: Math.max(1, Math.min(6, count)),
+        color: {
+            color: "rgba(163, 58, 42, 0.18)",
+            highlight: "rgba(163, 58, 42, 0.68)"
+        },
+        title: `共同出现 ${count} 次`,
+        smooth: { type: "continuous" }
+    };
+}
+
 // 构建人物关联数据
 function buildGraphData() {
     const records = getAllRecords();
@@ -33,20 +65,14 @@ function buildGraphData() {
         });
         const count = relatedRecords.length;
         const id = `char_${c.name}`;
-        const size = Math.max(15, Math.min(40, 15 + count * 5));
+        const size = Math.max(36, Math.min(72, 36 + count * 7));
         nodes.push({
             id,
             label: c.name,
             title: `${c.name}<br>出场 ${count} 次`,
-            value: count,
             size,
-            font: { size: 14, color: "#e6e9f0", face: "serif" },
             borderWidth: 2,
-            color: {
-                background: "rgba(201, 169, 89, 0.7)",
-                border: "#c9a959",
-                highlight: { background: "#e0c47a", border: "#c9a959" }
-            },
+            ...getNodeStyle(count),
             shape: "dot"
         });
         nodeMap[id] = true;
@@ -87,17 +113,10 @@ function buildGraphData() {
     });
 
     Object.values(charPairs).forEach(p => {
-        const width = Math.max(1, Math.min(8, p.count));
         edges.push({
             from: p.from,
             to: p.to,
-            width,
-            color: {
-                color: "rgba(201, 169, 89, 0.3)",
-                highlight: "rgba(201, 169, 89, 0.7)"
-            },
-            title: `共同出现 ${p.count} 次`,
-            smooth: { type: "continuous" }
+            ...getEdgeStyle(p.count)
         });
     });
 
@@ -163,25 +182,26 @@ export function showGraphModal() {
         modal.innerHTML = `
             <div class="modal-overlay"></div>
             <div class="modal-container">
-                <button class="modal-close-btn">✕</button>
+                <button class="modal-close-btn" aria-label="关闭人物关系图谱">✕</button>
                 <div class="modal-content">
-                    <h3 style="color:var(--accent); margin-bottom:16px;">🔗 人物关系图谱</h3>
-                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:12px;">
-                        节点大小表示出场次数，连线越粗表示共同出现越多
-                    </p>
+                    <div class="graph-modal__header">
+                        <span class="graph-modal__eyebrow">关系档案</span>
+                        <h3>人物关系图谱</h3>
+                        <p class="graph-modal__description">节点大小表示出场次数，连线越粗表示共同出现越多。</p>
+                    </div>
                     <div id="graphNetwork"></div>
                     <div class="graph-legend">
                         <span class="graph-legend-item">
-                            <span class="graph-legend-dot" style="background:rgba(201,169,89,0.7);"></span>
+                            <span class="graph-legend-dot graph-legend-dot--node" aria-hidden="true"></span>
                             人物节点
                         </span>
                         <span class="graph-legend-item">
-                            <span class="graph-legend-dot" style="background:rgba(201,169,89,0.3);width:20px;height:3px;border-radius:2px;"></span>
+                            <span class="graph-legend-dot graph-legend-dot--edge" aria-hidden="true"></span>
                             关联线
                         </span>
                     </div>
-                    <div style="text-align:center;margin-top:16px;">
-                        <button id="downloadGraphBtn" class="search-action-btn secondary" style="display:inline-flex;align-items:center;gap:6px;">📥 下载图谱</button>
+                    <div class="graph-modal__actions">
+                        <button id="downloadGraphBtn" class="search-action-btn secondary">下载图谱</button>
                     </div>
                 </div>
             </div>
@@ -211,7 +231,7 @@ function initGraph(modal) {
 
     // 检查 vis 库是否加载
     if (typeof vis === "undefined") {
-        container.innerHTML = "<p style=\"color:var(--text-muted);text-align:center;padding:40px;\">vis-network 加载中…</p>";
+        container.innerHTML = "<p class=\"graph-empty\">关系图谱加载中…</p>";
         setTimeout(() => initGraph(modal), 500);
         return;
     }
@@ -219,7 +239,7 @@ function initGraph(modal) {
     const { nodes: nodesData, edges: edgesData } = buildGraphData();
 
     if (nodesData.length === 0) {
-        container.innerHTML = "<p style=\"color:var(--text-muted);text-align:center;padding:40px;\">暂无人物数据</p>";
+        container.innerHTML = "<p class=\"graph-empty\">暂无人物数据</p>";
         return;
     }
 
@@ -246,6 +266,10 @@ function initGraph(modal) {
     let physicsEnabled = true;
 
     const options = {
+        layout: {
+            improvedLayout: true,
+            randomSeed: "15class-history"
+        },
         physics: {
             enabled: true,
             solver: "barnesHut",
@@ -254,9 +278,9 @@ function initGraph(modal) {
                 updateInterval: 25
             },
             barnesHut: {
-                gravitationalConstant: -3000,
-                springLength: 180,
-                springConstant: 0.03,
+                gravitationalConstant: -5000,
+                springLength: 280,
+                springConstant: 0.025,
                 damping: 0.1
             },
             maxVelocity: 20
@@ -272,12 +296,13 @@ function initGraph(modal) {
         },
         nodes: {
             shape: "dot",
-            font: { face: "serif", size: 14, color: "#e6e9f0" },
+            font: { face: "Noto Sans SC", size: 22, color: "#171714", strokeWidth: 0 },
+            scaling: { label: { enabled: false } },
             borderWidth: 2,
             color: {
-                background: "rgba(201, 169, 89, 0.7)",
-                border: "#c9a959",
-                highlight: { background: "#e0c47a", border: "#c9a959" }
+                background: "#ffffff",
+                border: "#a33a2a",
+                highlight: { background: "#f1e4df", border: "#8f2f22" }
             }
         },
         height: container.style.height

@@ -129,6 +129,8 @@ async function loadSiteConfig() {
   try {
     const config = await apiFetch("/config/public");
     window.historyDefaultGrade = config.defaultGrade;
+    const heroDefaultGrade = document.getElementById("heroDefaultGrade");
+    if (heroDefaultGrade) heroDefaultGrade.textContent = config.defaultGrade;
   } catch (err) {
     console.warn("首页配置加载失败，使用本地默认值:", err.message);
   }

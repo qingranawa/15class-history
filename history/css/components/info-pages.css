@@ -177,3 +177,90 @@
         font-size: 1.7rem;
     }
 }
+
+/* ===== 数字博物馆覆盖 ===== */
+.info-page-container {
+    padding-top: 0;
+}
+
+.info-page {
+    padding-top: 48px;
+}
+
+.info-page__content {
+    background: var(--museum-surface);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.info-page__content h1 {
+    color: var(--museum-ink);
+}
+
+.info-page__content h2 {
+    color: var(--museum-accent);
+}
+
+.info-page__content p,
+.info-page__content li {
+    color: var(--museum-ink-soft);
+}
+
+.info-page__content strong {
+    color: var(--museum-ink);
+}
+
+.info-page__mono,
+.info-page__note {
+    color: var(--museum-accent) !important;
+}
+
+.info-page__link {
+    color: var(--museum-accent);
+    border-bottom-color: var(--museum-accent);
+}
+
+.info-contact-card {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+}
+
+.info-contact-card__name {
+    color: var(--museum-accent);
+}
+
+.info-contact-card__wechat {
+    color: var(--museum-ink);
+}
+
+.info-submit-form input,
+.info-submit-form textarea {
+    background: var(--museum-surface-muted);
+    border-color: var(--museum-line);
+    border-radius: var(--radius-md);
+    color: var(--museum-ink);
+}
+
+.info-submit-form input:focus,
+.info-submit-form textarea:focus {
+    border-color: var(--museum-accent);
+    box-shadow: 0 0 0 3px var(--museum-accent-soft);
+}
+
+.info-submit-form button {
+    background: var(--museum-accent);
+    border-radius: var(--radius-md);
+    color: #fff;
+}
+
+.info-submit-form button:hover {
+    background: #8f2f22;
+}
+
+@media (max-width: 600px) {
+    .info-page {
+        padding-top: 32px;
+    }
+}
