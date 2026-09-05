@@ -18,8 +18,8 @@ triggered_by_plan: null
 
 #### 用户认证
 **Enables** — 用户登录/注册/自动登录，获取 JWT token 用于后续 API 鉴权。
-**Actors / Entry Points** — 所有用户 → 登录弹窗 → `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me`
-**Capability Boundary** — 首个注册用户自动成为 Chairperson。中文用户名被拦截。支持 dev 模式跳过验证 (`?dev=true`)。
+**Actors / Entry Points** — 所有用户 → `history/login.html` → `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me`
+**Capability Boundary** — 首个注册用户自动成为 Chairperson。中文用户名被拦截。首页不再强制登录，登录页只用于获取投稿和后台所需的会话。支持 dev 模式跳过验证 (`?dev=true`)。
 **References** — architecture.md §Scenario Sequences, ADR-002
 
 #### 稿件管理（创建-编辑-审核-发布）
@@ -48,7 +48,7 @@ triggered_by_plan: null
 
 #### 普通用户投稿
 **Enables** — 任何注册用户可在主页提交文字素材投稿，进入素材整理流程。
-**Actors / Entry Points** — 所有登录用户 → 主页「我要投稿」按钮 → `POST /api/materials`
+**Actors / Entry Points** — 所有登录用户 → `history/submit.html` → `POST /api/materials`
 **Capability Boundary** — 投稿内容需同时填写标题和正文。投稿后进入 submitted 状态等待执书委员整理。
 **References** — architecture.md §Material Status
 

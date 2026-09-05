@@ -74,9 +74,9 @@ function showWelcomeMessage(username, role, isDev) {
       welcomeDiv.appendChild(adminLink);
     }
 
-    // 显示投稿按钮（所有登录用户）
-    const submitBtn = document.getElementById("submitBtn");
-    if (submitBtn) submitBtn.style.display = "";
+    // 显示投稿入口（所有登录用户）
+    const submitLink = document.getElementById("submitLink");
+    if (submitLink) submitLink.classList.remove("hidden");
   }
   hero.insertAdjacentElement("afterend", welcomeDiv);
 }
@@ -145,6 +145,14 @@ async function loginViaAPI(username, password) {
   return data.user;
 }
 
+/** 注册站点账户 */
+async function registerViaAPI(username, password) {
+  return apiFetch("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+}
+
 /** 自动登录（已存储 token） */
 async function autoLogin() {
   const token = getToken();
@@ -180,14 +188,21 @@ async function loginFallback(username, password) {
   return { username, role: "user" };
 }
 
+window.siteAuth = {
+  apiFetch,
+  loginViaAPI,
+  loginFallback,
+  registerViaAPI,
+  autoLogin,
+  getToken,
+  setToken,
+  clearToken,
+};
+
 // ===================== 主流程 =====================
 document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("authModal");
   const mainContent = document.getElementById("mainContent");
-  const usernameInput = document.getElementById("username");
-  const passwordInput = document.getElementById("password");
-  const authBtn = document.getElementById("authBtn");
-  const errorDiv = document.getElementById("authError");
+  if (!mainContent) return;
 
   const urlParams = new URLSearchParams(window.location.search);
   const devParam = urlParams.get("dev");
@@ -201,8 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /** 初始化网站（加载数据 + 启动应用） */
   async function initSite(user, isDev) {
-    modal?.classList.add("hidden");
-    mainContent?.classList.remove("hidden");
+    mainContent.classList.remove("hidden");
     if (user) showWelcomeMessage(user.username, user.role, isDev);
 
     // 优先从 API 加载数据，失败则使用静态数据
@@ -228,170 +242,6 @@ document.addEventListener("DOMContentLoaded", () => {
   autoLogin().then((user) => {
     if (user) {
       showWelcomeMessage(user.username, user.role, false);
-      const submitBtn = document.getElementById("submitBtn");
-      if (submitBtn) submitBtn.style.display = "";
     }
   });
-
-  // 登录处理
-  async function verifyAndEnter() {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value;
-
-    if (!username) {
-      errorDiv.textContent = "请填写姓名";
-      return;
-    }
-    if (!password) {
-      errorDiv.textContent = "请填写密码";
-      return;
-    }
-
-    errorDiv.textContent = "验证中...";
-
-    try {
-      // 优先尝试后端登录
-      let user;
-      try {
-        user = await loginViaAPI(username, password);
-      } catch {
-        // 后端不可用，尝试静态密码回退
-        user = await loginFallback(username, password);
-        if (!user) {
-          errorDiv.textContent = "密码错误，不得入史";
-          passwordInput.value = "";
-          shakeModal();
-          return;
-        }
-      }
-
-      await initSite(user, false);
-    } catch (err) {
-      console.error("验证出错:", err);
-      errorDiv.textContent = "验证失败，请重试";
-      passwordInput.value = "";
-    }
-  }
-
-  function shakeModal() {
-    const authContent = document.querySelector(".auth-modal-content");
-    if (!authContent) return;
-    authContent.classList.remove("shake");
-    void authContent.offsetWidth;
-    authContent.classList.add("shake");
-    setTimeout(() => authContent.classList.remove("shake"), 500);
-  }
-
-  // 注册处理
-  async function registerUser() {
-    const regUser = document.getElementById("regUsername").value.trim();
-    const regPass = document.getElementById("regPassword").value.trim();
-    if (!regUser || !regPass) {
-      errorDiv.textContent = "请填写用户名和密码";
-      return;
-    }
-    if (/[一-鿿]/.test(regUser)) {
-      errorDiv.textContent = "账户名不能包含中文，请使用英文或拼音";
-      return;
-    }
-    errorDiv.textContent = "注册中...";
-    try {
-      await apiFetch("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ username: regUser, password: regPass }),
-      });
-      errorDiv.textContent = "";
-      toastMsg("注册成功！请登录", "success");
-      switchAuthTab("login");
-      document.getElementById("username").value = regUser;
-      document.getElementById("password").value = regPass;
-    } catch (err) {
-      errorDiv.textContent = err.message;
-    }
-  }
-
-  function switchAuthTab(tab) {
-    document.querySelectorAll(".auth-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === tab));
-    document.getElementById("authLoginForm").style.display = tab === "login" ? "block" : "none";
-    document.getElementById("authRegisterForm").style.display = tab === "register" ? "block" : "none";
-    errorDiv.textContent = "";
-  }
-
-  function toastMsg(msg, type) {
-    const el = document.createElement("div");
-    el.style.cssText =
-      "position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;animation:toastIn .3s ease;background:" +
-      (type === "success" ? "#22c55e" : "#ef4444");
-    el.textContent = msg;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
-  }
-
-  authBtn.addEventListener("click", verifyAndEnter);
-  passwordInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      verifyAndEnter();
-    }
-  });
-  usernameInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      verifyAndEnter();
-    }
-  });
-  document.getElementById("regBtn").addEventListener("click", registerUser);
-  document.getElementById("regPassword").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      registerUser();
-    }
-  });
-  document.getElementById("regUsername").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") document.getElementById("regPassword").focus();
-  });
-  document.querySelectorAll(".auth-tab").forEach((tab) => {
-    tab.addEventListener("click", () => switchAuthTab(tab.dataset.tab));
-  });
-
-  // 投稿处理
-  const submitBtn = document.getElementById("submitBtn");
-  const submitMaterialBtn = document.getElementById("submitMaterialBtn");
-  if (submitBtn) {
-    submitBtn.addEventListener("click", () => {
-      document.getElementById("submitModal").classList.remove("hidden");
-      document.getElementById("submitError").textContent = "";
-      document.getElementById("submitSuccess").textContent = "";
-    });
-  }
-  if (submitMaterialBtn) {
-    submitMaterialBtn.addEventListener("click", async () => {
-      const title = document.getElementById("submitTitle").value.trim();
-      const content = document.getElementById("submitContent").value.trim();
-      const errEl = document.getElementById("submitError");
-      const okEl = document.getElementById("submitSuccess");
-      errEl.textContent = "";
-      okEl.textContent = "";
-      if (!title) {
-        errEl.textContent = "请填写投稿标题";
-        return;
-      }
-      if (!content) {
-        errEl.textContent = "请填写投稿内容";
-        return;
-      }
-      try {
-        await apiFetch("/materials", {
-          method: "POST",
-          body: JSON.stringify({ title, content, materialType: "text" }),
-        });
-        okEl.textContent = "投稿成功！执书委员会整理后交给执笔委员写史";
-        document.getElementById("submitTitle").value = "";
-        document.getElementById("submitContent").value = "";
-        setTimeout(() => document.getElementById("submitModal").classList.add("hidden"), 1500);
-      } catch (err) {
-        errEl.textContent = err.message;
-      }
-    });
-  }
 });

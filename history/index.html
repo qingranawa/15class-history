@@ -68,48 +68,19 @@
   </head>
 
   <body>
-    <!-- 登录模态框仅用于已有登录态兼容，不阻塞访客浏览 -->
-    <div id="authModal" class="auth-modal hidden">
-      <div class="auth-modal-content">
-        <h2>📜 班史准入</h2>
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-tab="login">🔑 登录</button>
-          <button class="auth-tab" data-tab="register">📝 注册</button>
-        </div>
-        <div id="authLoginForm">
-          <input
-            type="text"
-            id="username"
-            placeholder="姓名"
-            autocomplete="off"
-          />
-          <input type="password" id="password" placeholder="密码" />
-          <button id="authBtn">入史</button>
-        </div>
-        <div id="authRegisterForm" style="display:none">
-          <p class="register-hint">⚠️ 账户名不能包含中文，请使用英文或拼音</p>
-          <input type="text" id="regUsername" placeholder="用户名（英文/拼音）" autocomplete="off" />
-          <input type="password" id="regPassword" placeholder="密码" value="admin123456" />
-          <button id="regBtn">注册</button>
-        </div>
-        <div id="authError" class="auth-error"></div>
-      </div>
-    </div>
-
     <!-- 主内容容器 -->
     <div class="container hidden" id="mainContent">
-      <nav class="page-nav">
-        <div class="nav-group">
-          <button class="nav-btn" id="submitBtn" data-nav="submit" style="display:none">📝 我要投稿</button>
-          <button class="nav-btn" data-nav="contribute">📝 如何投稿</button>
-          <button class="nav-btn" data-nav="joinus">🤝 加入我们</button>
-        </div>
-        <span class="nav-divider" aria-hidden="true">⟡</span>
-        <div class="nav-group">
-          <button class="nav-btn" data-nav="guide">📘 新手指南</button>
-          <button class="nav-btn" data-nav="disclaimer">⚖️ 免责协议</button>
+      <nav class="page-nav" aria-label="班史辅助导航">
+        <div class="page-nav__links">
+          <a class="nav-btn page-nav__link" href="contribute.html">📝 如何投稿</a>
+          <a class="nav-btn page-nav__link" href="joinus.html">🤝 加入我们</a>
+          <a class="nav-btn page-nav__link" href="guide.html">📘 新手指南</a>
+          <a class="nav-btn page-nav__link" href="disclaimer.html">⚖️ 免责协议</a>
+          <a class="nav-btn page-nav__link hidden" id="submitLink" href="submit.html">📝 我要投稿</a>
+          <a class="nav-btn page-nav__link" href="login.html">🔑 登录</a>
         </div>
       </nav>
+
       <!-- 功能栏 -->
       <div class="function-bar">
         <div class="search-section">
@@ -218,22 +189,6 @@
     <!-- 返回顶部按钮 -->
     <button id="backToTop" class="back-to-top" aria-label="返回顶部">↑</button>
 
-    <!-- 投稿模态框 -->
-    <div id="submitModal" class="auth-modal hidden">
-      <div class="auth-modal-content" style="max-width:520px">
-        <h2>📝 投稿</h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:12px">向编纂委员会提供班级史事素材</p>
-        <input type="text" id="submitTitle" placeholder="投稿标题（必填）" style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text);font-size:14px" />
-        <textarea id="submitContent" placeholder="投稿内容...&#10;描述你观察到/经历的值得记录的事情" style="width:100%;padding:10px;min-height:120px;margin-bottom:10px;border-radius:8px;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text);font-size:14px;resize:vertical"></textarea>
-        <div style="display:flex;gap:8px">
-          <button id="submitMaterialBtn" style="flex:1;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:14px">提交投稿</button>
-          <button onclick="document.getElementById('submitModal').classList.add('hidden')" style="padding:10px 20px;border:1px solid var(--border-light);border-radius:8px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:14px">取消</button>
-        </div>
-        <div id="submitError" style="color:#ff8a8a;margin-top:8px;font-size:13px"></div>
-        <div id="submitSuccess" style="color:#4ade80;margin-top:8px;font-size:13px"></div>
-      </div>
-    </div>
-
     <script>
       document.getElementById("currentYear").innerText =
         new Date().getFullYear();
@@ -243,9 +198,17 @@
 
 <!--
 history/
-├── index.html                # 主页面结构：登录模态框、导航栏、功能栏、内容容器
+├── index.html                # 主页面结构：导航栏、功能栏、内容容器
+├── contribute.html           # 如何投稿独立页面
+├── joinus.html               # 加入我们独立页面
+├── guide.html                # 新手指南独立页面
+├── disclaimer.html           # 免责协议独立页面
+├── login.html                # 登录/注册独立页面
+├── submit.html               # 投稿独立页面
 ├── data.js                   # 静态数据（正史/外史/戏史记录、人物档案）
-├── auth.js                   # 前端登录验证（SHA-256 哈希校验、?dev 开发模式跳过）
+├── auth.js                   # 登录态与首页数据加载（?dev 开发模式跳过）
+├── login.js                  # 登录/注册页面交互
+├── submit.js                 # 投稿页面交互
 ├── css/
 │   ├── base/
 │   │   └── base.css          # CSS 变量定义、重置样式、全局排版、背景星空
@@ -254,11 +217,12 @@ history/
 │   ├── effects/
 │   │   ├── animations.css    # 全局动画关键帧 + UX 增强
 │   │   └── utilities.css     # 工具类、滚动条美化、响应式微调
-│   └── components/
+│   ├── components/
 │       ├── buttons.css       # 独立按钮组件（返回顶部、随机触发按钮）
 │       ├── characters.css    # 人物卡片网格样式
 │       ├── comments.css      # 雁过留声评注区
 │       ├── graph.css         # 关系图谱容器与图例
+│       ├── info-pages.css    # 独立信息页与投稿表单
 │       ├── loading.css       # 加载骨架屏样式
 │       ├── modal.css         # 模态框通用样式
 │       ├── navigation.css    # 导航栏、类别、年级、排序控件
@@ -266,6 +230,7 @@ history/
 │       ├── search.css        # 搜索触发框与模态框
 │       ├── stats.css         # 统计看板图表
 │       └── timeline.css      # 时间轴卡片样式
+│   └── login.css              # 独立登录页样式
 ├── js/
 │   ├── core/
 │   │   ├── main.js           # 入口文件，初始化所有模块
@@ -273,7 +238,6 @@ history/
 │   │   └── common.js         # 公共配置、快捷键、模态框栈
 │   ├── ui/
 │   │   ├── modal.js          # 核心模态框（纪传详情/人物/搜索/随机）
-│   │   ├── modal-extras.js   # 次要模态框（加入/投稿/指南/免责）
 │   │   └── render.js         # 渲染函数（卡片、网格、空状态）
 │   ├── effects/
 │   │   └── animations.js     # 动画特效（入场观察器、视差、过渡）

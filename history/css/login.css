@@ -1,0 +1,133 @@
+/* ===== 独立登录页 ===== */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 16px 48px;
+}
+
+.login-card {
+    width: min(100%, 460px);
+    margin-top: 28px;
+    padding: 36px 40px;
+    background: rgba(18, 22, 28, 0.86);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+}
+
+.login-card__back {
+    display: inline-block;
+    margin-bottom: 28px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.login-card__back:hover {
+    color: var(--accent);
+}
+
+.login-card h1 {
+    color: var(--accent);
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.login-card__intro {
+    color: var(--text-secondary);
+    margin-bottom: 26px;
+}
+
+.login-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 24px;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 11px 14px;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    font-size: 0.95rem;
+}
+
+.login-tab:hover,
+.login-tab[aria-selected="true"] {
+    color: var(--accent);
+}
+
+.login-tab[aria-selected="true"] {
+    border-bottom-color: var(--accent);
+}
+
+.login-panel[hidden] {
+    display: none;
+}
+
+.login-form {
+    display: grid;
+    gap: 10px;
+}
+
+.login-form label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 11px 13px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.login-form button {
+    margin-top: 8px;
+    padding: 11px 16px;
+    background: var(--accent);
+    border-radius: 8px;
+    color: #0b0c0e;
+    font-weight: 600;
+}
+
+.login-form button:hover {
+    background: var(--accent-light);
+}
+
+.login-form__hint {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.login-message {
+    min-height: 1.6em;
+    margin-top: 18px;
+    color: var(--text-secondary);
+}
+
+.login-message--error {
+    color: #ff8a8a;
+}
+
+.login-message--success {
+    color: #75e6a3;
+}
+
+@media (max-width: 600px) {
+    .login-card {
+        padding: 28px 22px;
+    }
+}

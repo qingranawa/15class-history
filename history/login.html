@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>登录 · 2025级15班班级史记</title>
+    <link rel="stylesheet" href="css/base/base.css" />
+    <link rel="stylesheet" href="css/layout/layout.css" />
+    <link rel="stylesheet" href="css/components/navigation.css" />
+    <link rel="stylesheet" href="css/components/info-pages.css" />
+    <link rel="stylesheet" href="css/login.css" />
+    <link rel="stylesheet" href="css/effects/utilities.css" />
+    <script src="auth.js" defer></script>
+    <script src="login.js" defer></script>
+  </head>
+  <body>
+    <div class="container info-page-container">
+      <nav class="page-nav" aria-label="班史辅助导航">
+        <div class="page-nav__links">
+          <a class="nav-btn page-nav__link" href="contribute.html">📝 如何投稿</a>
+          <a class="nav-btn page-nav__link" href="joinus.html">🤝 加入我们</a>
+          <a class="nav-btn page-nav__link" href="guide.html">📘 新手指南</a>
+          <a class="nav-btn page-nav__link" href="disclaimer.html">⚖️ 免责协议</a>
+          <a class="nav-btn page-nav__link" href="login.html" aria-current="page">🔑 登录</a>
+        </div>
+      </nav>
+
+      <main class="login-page">
+        <section class="login-card" aria-labelledby="loginTitle">
+          <a class="login-card__back" href="index.html">← 返回班史</a>
+          <h1 id="loginTitle">🔑 账户登录</h1>
+          <p class="login-card__intro">登录后可以提交班级史事素材。</p>
+
+          <div class="login-tabs" role="tablist" aria-label="账户操作">
+            <button
+              class="login-tab"
+              type="button"
+              id="loginTab"
+              role="tab"
+              aria-controls="loginPanel"
+              aria-selected="true"
+              tabindex="0"
+            >登录</button>
+            <button
+              class="login-tab"
+              type="button"
+              id="registerTab"
+              role="tab"
+              aria-controls="registerPanel"
+              aria-selected="false"
+              tabindex="-1"
+            >注册</button>
+          </div>
+
+          <section id="loginPanel" class="login-panel" role="tabpanel" aria-labelledby="loginTab">
+            <form id="loginForm" class="login-form">
+              <label for="loginUsername">用户名</label>
+              <input type="text" id="loginUsername" autocomplete="username" required />
+              <label for="loginPassword">密码</label>
+              <input type="password" id="loginPassword" autocomplete="current-password" required />
+              <button type="submit">登录并返回班史</button>
+              <p class="login-form__hint">普通用户可登录查看并投稿，编纂委员可从管理后台进入管理面板。</p>
+            </form>
+          </section>
+
+          <section id="registerPanel" class="login-panel" role="tabpanel" aria-labelledby="registerTab" hidden>
+            <form id="registerForm" class="login-form">
+              <label for="registerUsername">用户名</label>
+              <input type="text" id="registerUsername" autocomplete="username" required />
+              <label for="registerPassword">密码</label>
+              <input type="password" id="registerPassword" autocomplete="new-password" minlength="6" required />
+              <button type="submit">注册账户</button>
+              <p class="login-form__hint">用户名不能包含中文，密码至少 6 位。</p>
+            </form>
+          </section>
+
+          <p id="loginMessage" class="login-message" role="status" aria-live="polite"></p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

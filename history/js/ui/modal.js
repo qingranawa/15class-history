@@ -43,17 +43,13 @@ export function getRecordModal() {
                     <div class="footer-links">
                         <a class="footer-link" href="${EXTERNAL_LINKS.disclaimer}" target="_blank" rel="noopener noreferrer">📜 免责声明</a>
                         <a class="footer-link" href="${EXTERNAL_LINKS.compilation}" target="_blank" rel="noopener noreferrer">✍️ 入史编纂办法</a>
-                        <a class="footer-link" id="joinUsLink" style="cursor: pointer;">🤝 加入我们</a>
+                        <a class="footer-link" href="joinus.html">🤝 加入我们</a>
                     </div>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
         bindModalClose(modal, modalId);
-        modal.querySelector("#joinUsLink").addEventListener("click", (e) => {
-            e.preventDefault();
-            import("./modal-extras.js").then(m => m.showJoinUsModal());
-        });
     }
     return modal;
 }

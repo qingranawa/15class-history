@@ -8,7 +8,7 @@ triggered_by_plan: null
 
 ## Pattern Overview
 
-Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudflare Pages 托管原生 HTML/CSS/JS 单页应用。无构建工具、无框架——前端通过 `<script>` 标签按加载顺序协作，后端路由按 URL 前缀分发。架构以简单性和零冷启动为优先级。
+Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudflare Pages 托管原生 HTML/CSS/JS 页面。无构建工具、无框架——主站、说明页、登录页和投稿页通过独立 HTML 路由提供，主站前端通过 `<script>` 标签按加载顺序协作，后端路由按 URL 前缀分发。架构以简单性和零冷启动为优先级。
 
 ## System Context
 
@@ -21,7 +21,7 @@ Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudf
 ## Layering
 
 ### Frontend (`history/`) — 静态展示 + 管理面板
-- 入口: `history/index.html`（访客） / `history/admin.html`（编纂委员）
+- 入口: `history/index.html`（班史）、`history/contribute.html`（投稿说明）、`history/joinus.html`（加入我们）、`history/guide.html`（新手指南）、`history/disclaimer.html`（免责协议）、`history/login.html`（登录）、`history/submit.html`（投稿） / `history/admin.html`（编纂委员）
 - 数据: `history/data.js` (静态回退) → `history/auth.js` (登录 + API 数据) → `history/js/core/main.js` (应用启动)
 - UI: `history/js/ui/render.js`（渲染）、`history/js/ui/modal.js`（弹窗）
 - 功能: `history/js/features/stats.js`（统计）、`history/js/features/graph.js`（关系图）、`history/js/features/comments.js`（评论）
@@ -45,14 +45,19 @@ Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudf
 ### 登录与数据加载
 ```mermaid
 sequenceDiagram
+  participant Login as login.html
   participant Browser
   participant Pages
   participant Worker
   participant D1
 
+  Login->>Pages: GET login.html
+  Login->>Worker: POST /api/auth/login
+  Worker->>D1: SELECT users WHERE username=?
+  Worker-->>Login: JWT + user
   Browser->>Pages: GET index.html
   Pages-->>Browser: HTML + data.js + auth.js
-  Browser->>Browser: DOMContentLoaded → 检查 dev 模式
+  Browser->>Browser: DOMContentLoaded → 访客直接初始化
   alt 已存储 token
     Browser->>Worker: GET /api/auth/me (Bearer token)
     Worker->>D1: SELECT users WHERE id=?

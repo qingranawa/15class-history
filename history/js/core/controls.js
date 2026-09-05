@@ -16,7 +16,6 @@ function getDefaultGrade() {
     const configuredGrade = window.historyDefaultGrade;
     return VALID_GRADES.includes(configuredGrade) ? configuredGrade : DEFAULT_GRADE;
 }
-
 // ---------- 人物排序状态 ----------
 export let currentCharacterSort = {
     type: "popularity",  // 'popularity' | 'alphabet' | 'descLength'
@@ -514,28 +513,5 @@ export function initRandomRead() {
             return;
         }
         import("../ui/modal.js").then(m => m.showRandomModal());
-    });
-}
-
-export function initPageNav() {
-    const navBtns = document.querySelectorAll(".nav-btn");
-    navBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const navType = btn.dataset.nav;
-            switch (navType) {
-                case "contribute":
-                    import("../ui/modal-extras.js").then(m => m.showContributeModal());
-                    break;
-                case "guide":
-                    import("../ui/modal-extras.js").then(m => m.showGuideModal());
-                    break;
-                case "disclaimer":
-                    import("../ui/modal-extras.js").then(m => m.showDisclaimerModal());
-                    break;
-                case "joinus":
-                    import("../ui/modal-extras.js").then(m => m.showJoinUsModal());
-                    break;
-            }
-        });
     });
 }

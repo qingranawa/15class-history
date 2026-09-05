@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>我要投稿 · 2025级15班班级史记</title>
+    <link rel="stylesheet" href="css/base/base.css" />
+    <link rel="stylesheet" href="css/layout/layout.css" />
+    <link rel="stylesheet" href="css/components/navigation.css" />
+    <link rel="stylesheet" href="css/components/info-pages.css" />
+    <link rel="stylesheet" href="css/effects/utilities.css" />
+    <script src="auth.js" defer></script>
+    <script src="submit.js" defer></script>
+  </head>
+  <body>
+    <div class="container info-page-container">
+      <nav class="page-nav" aria-label="班史辅助导航">
+        <div class="page-nav__links">
+          <a class="nav-btn page-nav__link" href="contribute.html">📝 如何投稿</a>
+          <a class="nav-btn page-nav__link" href="joinus.html">🤝 加入我们</a>
+          <a class="nav-btn page-nav__link" href="guide.html">📘 新手指南</a>
+          <a class="nav-btn page-nav__link" href="disclaimer.html">⚖️ 免责协议</a>
+          <a class="nav-btn page-nav__link" href="submit.html" aria-current="page">📝 我要投稿</a>
+          <a class="nav-btn page-nav__link" href="login.html">🔑 登录</a>
+        </div>
+      </nav>
+
+      <main class="info-page">
+        <article class="info-page__content">
+          <h1>📝 我要投稿</h1>
+          <p id="submitGuard" class="info-page__note">正在检查登录状态...</p>
+          <form id="submitForm" class="info-submit-form" hidden>
+            <label for="submitTitle">投稿标题</label>
+            <input type="text" id="submitTitle" placeholder="投稿标题（必填）" required />
+            <label for="submitContent">投稿内容</label>
+            <textarea id="submitContent" placeholder="描述你观察到或经历的值得记录的事情" required></textarea>
+            <button type="submit" id="submitMaterialBtn">提交投稿</button>
+            <p id="submitError" class="info-submit-form__message info-submit-form__message--error" role="alert"></p>
+            <p id="submitSuccess" class="info-submit-form__message info-submit-form__message--success" role="status"></p>
+          </form>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>

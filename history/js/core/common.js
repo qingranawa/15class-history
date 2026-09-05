@@ -1,5 +1,5 @@
 // js/common.js
-// 公共配置、全局状态、工具函数（供 modal.js 和 modal-extras.js 共享）
+// 公共配置、全局状态、工具函数（供 modal.js 共享）
 /* global historyData, extraHistory, dramaHistory, characters */
 
 // ==================== 外部链接配置（请在此修改） ====================

@@ -1,5 +1,5 @@
 // js/main.js
-import { initControls, initRandomRead, initSearchTrigger, initPageNav } from "./controls.js";
+import { initControls, initRandomRead, initSearchTrigger } from "./controls.js";
 import { initBackToTop, initParallaxHeader } from "../effects/animations.js";
 import { initStats } from "../features/stats.js";
 import { showGraphModal } from "../features/graph.js";
@@ -11,7 +11,6 @@ function initHistory() {
         return;
     }
     initControls();
-    initPageNav();
     initBackToTop();
     initRandomRead();
     initSearchTrigger();
