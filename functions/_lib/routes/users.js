@@ -7,6 +7,19 @@ const ADMIN_ROLES = [
   'SupervisorGeneral', 'DeputySupervisor',
   'Chairperson', 'ExecutiveDeputyChair',
 ];
+const DEFAULT_GRADE = '八上';
+const VALID_GRADES = ['七上', '七下', '八上', '八下', '九上', '九下'];
+
+async function getDefaultGrade(env) {
+  try {
+    const config = await env.DB.prepare(
+      `SELECT config_value FROM system_config WHERE config_key = 'default_grade'`
+    ).first();
+    return VALID_GRADES.includes(config?.config_value) ? config.config_value : DEFAULT_GRADE;
+  } catch {
+    return DEFAULT_GRADE;
+  }
+}
 
 /** GET /api/users —— 用户列表 */
 export async function handleListUsers(request, env) {
@@ -108,6 +121,11 @@ export async function handleListLogs(request, env) {
   return jsonResponse(results);
 }
 
+/** GET /api/config/public —— 获取访客需要的公开配置 */
+export async function handleGetPublicConfig(request, env) {
+  return jsonResponse({ defaultGrade: await getDefaultGrade(env) });
+}
+
 /** GET /api/config —— 获取系统配置（Chairperson / ExecutiveDeputyChair） */
 export async function handleGetConfig(request, env) {
   const auth = await withAuth(request, env);
@@ -136,6 +154,7 @@ export async function handleUsersRoute(request, env, path) {
 
   if (method === 'GET' && path === '/api/users') return handleListUsers(request, env);
   if (method === 'GET' && path === '/api/logs') return handleListLogs(request, env);
+  if (method === 'GET' && path === '/api/config/public') return handleGetPublicConfig(request, env);
   if (method === 'GET' && path === '/api/config') return handleGetConfig(request, env);
 
   const roleMatch = path.match(/^\/api\/users\/(\d+)\/role$/);
