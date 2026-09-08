@@ -1,6 +1,6 @@
 // ===================== 15class-history Worker 入口 =====================
 import { corsHeaders, handleCORS, errorResponse, jsonResponse } from "./utils.js";
-import { handleLogin, handleRegister, handleMe } from "./routes/auth.js";
+import { handleLogin, handleRegister, handleChangePassword, handleMe } from "./routes/auth.js";
 import { handleRecordsRoute } from "./routes/records.js";
 import { handleCharactersRoute } from "./routes/characters.js";
 import { handleMaterialsRoute } from "./routes/materials.js";
@@ -23,6 +23,8 @@ export default {
         response = await handleLogin(request, env);
       } else if (path === "/api/auth/register" && method === "POST") {
         response = await handleRegister(request, env);
+      } else if (path === "/api/auth/password" && method === "PUT") {
+        response = await handleChangePassword(request, env);
       } else if (path === "/api/auth/me" && method === "GET") {
         response = await handleMe(request, env);
       } else if (path.startsWith("/api/records")) {

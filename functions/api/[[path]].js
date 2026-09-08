@@ -1,7 +1,7 @@
 // ===================== 15class-history Pages Functions API 入口 =====================
 // 匹配 /api/* 的所有请求
 import { corsHeaders, errorResponse, jsonResponse } from '../_lib/utils.js';
-import { handleLogin, handleRegister, handleMe } from '../_lib/routes/auth.js';
+import { handleLogin, handleRegister, handleChangePassword, handleMe } from '../_lib/routes/auth.js';
 import { handleRecordsRoute } from '../_lib/routes/records.js';
 import { handleCharactersRoute } from '../_lib/routes/characters.js';
 import { handleMaterialsRoute } from '../_lib/routes/materials.js';
@@ -30,6 +30,8 @@ export async function onRequest(context) {
       response = await handleLogin(request, env);
     } else if (path === '/api/auth/register' && method === 'POST') {
       response = await handleRegister(request, env);
+    } else if (path === '/api/auth/password' && method === 'PUT') {
+      response = await handleChangePassword(request, env);
     } else if (path === '/api/auth/me' && method === 'GET') {
       response = await handleMe(request, env);
     } else if (path.startsWith('/api/records')) {

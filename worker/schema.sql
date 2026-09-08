@@ -62,6 +62,10 @@ CREATE TABLE IF NOT EXISTS materials (
     submitter_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL DEFAULT 'submitted'
         CHECK (status IN ('submitted', 'organized', 'in_use', 'archived')),
+    decision TEXT NOT NULL DEFAULT 'pending'
+        CHECK (decision IN ('pending', 'accepted', 'rejected')),
+    decision_by INTEGER REFERENCES users(id),
+    decision_at TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -93,5 +97,6 @@ CREATE INDEX IF NOT EXISTS idx_records_grade ON records(grade);
 CREATE INDEX IF NOT EXISTS idx_records_status ON records(status);
 CREATE INDEX IF NOT EXISTS idx_records_author ON records(author_id);
 CREATE INDEX IF NOT EXISTS idx_materials_submitter ON materials(submitter_id);
+CREATE INDEX IF NOT EXISTS idx_materials_decision ON materials(decision);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);

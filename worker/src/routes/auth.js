@@ -92,6 +92,52 @@ export async function handleRegister(request, env) {
   }, 201);
 }
 
+/** PUT /api/auth/password —— 修改当前用户密码 */
+export async function handleChangePassword(request, env) {
+  const auth = await withAuth(request, env);
+  if (auth.error) return errorResponse(auth.error, auth.status);
+
+  const body = await parseBody(request);
+  if (
+    !body ||
+    typeof body.currentPassword !== "string" ||
+    typeof body.newPassword !== "string" ||
+    !body.currentPassword ||
+    !body.newPassword
+  ) {
+    return errorResponse("当前密码和新密码为必填项", 400);
+  }
+  if (body.newPassword.length < 6) {
+    return errorResponse("新密码长度至少 6 位", 400);
+  }
+  if (body.currentPassword === body.newPassword) {
+    return errorResponse("新密码不能与当前密码相同", 400);
+  }
+
+  const user = await env.DB.prepare(
+    "SELECT password_hash FROM users WHERE id = ?"
+  ).bind(auth.user.id).first();
+  if (!user || !(await verifyPassword(body.currentPassword, user.password_hash))) {
+    return errorResponse("当前密码错误", 401);
+  }
+
+  const passwordHash = await hashPassword(body.newPassword);
+  await env.DB.prepare(
+    "UPDATE users SET password_hash=?, updated_at=datetime('now') WHERE id=?"
+  ).bind(passwordHash, auth.user.id).run();
+
+  await createAuditLog(
+    env.DB,
+    auth.user.id,
+    "change_password",
+    "user",
+    auth.user.id,
+    "修改账户密码"
+  );
+
+  return jsonResponse({ message: "密码修改成功" });
+}
+
 export async function handleMe(request, env) {
   const auth = await withAuth(request, env);
   if (auth.error) return errorResponse(auth.error, auth.status);

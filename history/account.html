@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>账户 · 2025级15班班级史记</title>
+    <link rel="stylesheet" href="css/base/base.css" />
+    <link rel="stylesheet" href="css/layout/layout.css" />
+    <link rel="stylesheet" href="css/components/navigation.css?v=20260905-museum" />
+    <link rel="stylesheet" href="css/components/info-pages.css" />
+    <link rel="stylesheet" href="css/museum-theme.css?v=20260905-museum" />
+    <link rel="stylesheet" href="css/account.css" />
+    <link rel="stylesheet" href="css/effects/utilities.css" />
+    <script src="auth.js" defer></script>
+    <script src="account.js" defer></script>
+  </head>
+  <body>
+    <div class="container info-page-container">
+      <nav class="page-nav" aria-label="班史辅助导航">
+        <div class="page-nav__links">
+          <a class="page-nav__brand" href="index.html">15班史记</a>
+          <div class="page-nav__primary">
+            <a class="nav-btn page-nav__link" href="index.html">首页</a>
+            <a class="nav-btn page-nav__link" href="submit.html">提交草稿</a>
+            <a class="nav-btn page-nav__link" href="disclaimer.html">免责声明</a>
+            <a class="nav-btn page-nav__link" href="guide.html">指南</a>
+          </div>
+          <a class="page-nav__login" href="login.html">登录</a>
+        </div>
+      </nav>
+
+      <main class="account-page" aria-labelledby="accountTitle">
+        <section id="accountGuard" class="account-guard" role="status" aria-live="polite">
+          正在验证账户状态...
+        </section>
+
+        <div id="accountContent" hidden>
+          <header class="account-header">
+            <div>
+              <span class="account-kicker">个人档案</span>
+              <h1 id="accountTitle">账户</h1>
+              <p>管理你的登录信息，查看提交给班史编纂委员会的内容建议。</p>
+            </div>
+            <div class="account-identity" aria-label="当前账户信息">
+              <span>当前用户</span>
+              <strong id="accountUsername">—</strong>
+              <small id="accountRole">—</small>
+            </div>
+          </header>
+
+          <div class="account-grid">
+            <section class="account-panel" aria-labelledby="passwordTitle">
+              <div class="account-panel__heading">
+                <span class="account-panel__index">01</span>
+                <div>
+                  <h2 id="passwordTitle">修改密码</h2>
+                  <p>使用当前密码确认身份，再设置新的登录密码。</p>
+                </div>
+              </div>
+              <form id="passwordForm" class="account-form">
+                <label for="currentPassword">当前密码</label>
+                <input id="currentPassword" type="password" autocomplete="current-password" required />
+                <label for="newPassword">新密码</label>
+                <input id="newPassword" type="password" autocomplete="new-password" minlength="6" required />
+                <label for="confirmPassword">确认新密码</label>
+                <input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required />
+                <button type="submit">保存新密码</button>
+                <p id="passwordMessage" class="account-form__message" role="status" aria-live="polite"></p>
+              </form>
+            </section>
+
+            <section class="account-panel account-submissions" aria-labelledby="submissionsTitle">
+              <div class="account-panel__heading account-submissions__heading">
+                <span class="account-panel__index">02</span>
+                <div>
+                  <h2 id="submissionsTitle">我的投稿</h2>
+                  <p>这里会显示编委会对你提交的内容建议的处理结果。</p>
+                </div>
+                <span id="submissionCount" class="account-submissions__count">0 条</span>
+              </div>
+              <div id="submissionsState" class="account-submissions__state" role="status" aria-live="polite">
+                正在加载投稿记录...
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -21,7 +21,7 @@ Serverless 单服务 + 静态前端。Cloudflare Worker 承载 REST API，Cloudf
 ## Layering
 
 ### Frontend (`history/`) — 静态展示 + 管理面板
-- 入口: `history/index.html`（班史）、`history/contribute.html`（投稿说明）、`history/joinus.html`（加入我们）、`history/guide.html`（新手指南）、`history/disclaimer.html`（免责协议）、`history/login.html`（登录）、`history/submit.html`（投稿） / `history/admin.html`（编纂委员）
+- 入口: `history/index.html`（班史）、`history/contribute.html`（投稿说明）、`history/joinus.html`（加入我们）、`history/guide.html`（新手指南）、`history/disclaimer.html`（免责协议）、`history/login.html`（登录）、`history/account.html`（账户）、`history/submit.html`（投稿） / `history/admin.html`（编纂委员）
 - 数据: `history/data.js` (静态回退) → `history/auth.js` (登录 + API 数据) → `history/js/core/main.js` (应用启动)
 - UI: `history/js/ui/render.js`（渲染）、`history/js/ui/modal.js`（弹窗）
 - 功能: `history/js/features/stats.js`（统计）、`history/js/features/graph.js`（关系图）、`history/js/features/comments.js`（评论）
@@ -104,6 +104,21 @@ stateDiagram-v2
   pending_review --> rejected: 驳回 (review reject)
   approved --> [*]
 ```
+
+### 投稿采纳反馈
+
+`materials.status` 继续表示后台整理流程；`materials.decision` 单独表示编委会对投稿内容建议的反馈：
+
+```mermaid
+stateDiagram-v2
+  [*] --> pending: 用户投稿
+  pending --> accepted: 编委会采纳
+  pending --> rejected: 编委会未采纳
+  accepted --> rejected: 重新评估
+  rejected --> accepted: 重新评估
+```
+
+账户页通过 `GET /api/materials?mine=1` 由服务端按当前用户过滤投稿。MaterialCollector 及以上角色通过 `PUT /api/materials/:id/decision` 更新采纳结果。
 
 ### Material Status
 ```mermaid

@@ -17,9 +17,9 @@ triggered_by_plan: null
 **References** — architecture.md §Record Status, ADR-003
 
 #### 用户认证
-**Enables** — 用户登录/注册/自动登录，获取 JWT token 用于后续 API 鉴权。
-**Actors / Entry Points** — 所有用户 → `history/login.html` → `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me`
-**Capability Boundary** — 首个注册用户自动成为 Chairperson。中文用户名被拦截。首页不再强制登录，登录页只用于获取投稿和后台所需的会话。支持 dev 模式跳过验证 (`?dev=true`)。
+**Enables** — 用户登录/注册/自动登录、进入账户页和修改自己的密码，获取 JWT token 用于后续 API 鉴权。
+**Actors / Entry Points** — 所有用户 → `history/login.html` → `POST /api/auth/login`, `POST /api/auth/register`, `GET /api/auth/me`; 已登录用户 → `history/account.html` → `PUT /api/auth/password`
+**Capability Boundary** — 首个注册用户自动成为 Chairperson。中文用户名被拦截。首页不再强制登录，登录页只用于获取投稿和后台所需的会话。账户页改密必须校验当前密码，不返回密码信息。支持 dev 模式跳过验证 (`?dev=true`)。
 **References** — architecture.md §Scenario Sequences, ADR-002
 
 #### 稿件管理（创建-编辑-审核-发布）
@@ -29,9 +29,9 @@ triggered_by_plan: null
 **References** — architecture.md §Record Status, see ADR-001
 
 #### 素材资料管理
-**Enables** — 素材四步流转：用户投稿 (submitted) → 执书委员已整理确认 (organized) → 标记已采用 (in_use) → 归档 (archived)。执笔委员查看已采用素材辅助写史。
-**Actors / Entry Points** — 所有登录用户 → `POST /api/materials`（投稿）；MaterialCollector → `PUT /api/materials/:id`（状态流转）
-**Capability Boundary** — 素材类型：文字资料(text)、图片资料(image)、档案文件(file)。MaterialCollector 可管理所有素材状态。
+**Enables** — 素材四步内部流转：用户投稿 (submitted) → 执书委员已整理确认 (organized) → 进入编纂 (in_use) → 归档 (archived)；另有独立采纳反馈：待处理 (pending) / 已采纳 (accepted) / 未采纳 (rejected)。执笔委员查看已采用素材辅助写史。
+**Actors / Entry Points** — 所有登录用户 → `POST /api/materials`（投稿）；登录用户 → `GET /api/materials?mine=1`（本人投稿）；MaterialCollector → `PUT /api/materials/:id`（整理状态）和 `PUT /api/materials/:id/decision`（采纳结果）
+**Capability Boundary** — 素材类型：文字资料(text)、图片资料(image)、档案文件(file)。MaterialCollector 可管理所有素材状态和采纳结果；`mine=1` 由服务端强制按 submitter_id 过滤。
 **References** — architecture.md §Material Status
 
 #### 人物档案
@@ -47,9 +47,9 @@ triggered_by_plan: null
 **References** — architecture.md §Layering
 
 #### 普通用户投稿
-**Enables** — 任何注册用户可在主页提交文字素材投稿，进入素材整理流程。
-**Actors / Entry Points** — 所有登录用户 → `history/submit.html` → `POST /api/materials`
-**Capability Boundary** — 投稿内容需同时填写标题和正文。投稿后进入 submitted 状态等待执书委员整理。
+**Enables** — 任何注册用户可提交文字素材投稿，并在账户页查看编委会是否采纳。
+**Actors / Entry Points** — 所有登录用户 → `history/submit.html` → `POST /api/materials`; 已登录用户 → `history/account.html` → `GET /api/materials?mine=1`
+**Capability Boundary** — 投稿内容需同时填写标题和正文。投稿后进入 `submitted` 内部状态和 `pending` 采纳结果，采纳结果由 MaterialCollector 及以上角色更新。
 **References** — architecture.md §Material Status
 
 ### Platform Capabilities

@@ -9,12 +9,13 @@ export async function handleListMaterials(request, env) {
 
   const url = new URL(request.url);
   const status = url.searchParams.get("status");
+  const mineOnly = url.searchParams.get("mine") === "1";
 
   let sql = "SELECT m.*, u.username as submitter_name FROM materials m LEFT JOIN users u ON m.submitter_id = u.id WHERE 1=1";
   const binds = [];
 
   // 普通用户只看自己的，执书委员及以上看全部
-  if (auth.user.role === "user") {
+  if (mineOnly || auth.user.role === "user") {
     sql += " AND m.submitter_id = ?";
     binds.push(auth.user.id);
   }
@@ -87,6 +88,42 @@ export async function handleUpdateMaterial(request, env, matId) {
   return jsonResponse({ message: "素材修改成功" });
 }
 
+/** PUT /api/materials/:id/decision —— 标记投稿采纳结果 */
+export async function handleUpdateMaterialDecision(request, env, matId) {
+  const auth = await withAuth(request, env);
+  if (auth.error) return errorResponse(auth.error, auth.status);
+
+  const roleErr = requireRole(auth.user, "MaterialCollector");
+  if (roleErr) return errorResponse(roleErr.error, roleErr.status);
+
+  const existing = await env.DB.prepare(
+    "SELECT id, title FROM materials WHERE id = ?"
+  ).bind(matId).first();
+  if (!existing) return errorResponse("素材不存在", 404);
+
+  const body = await parseBody(request);
+  const decision = body?.decision;
+  if (!["accepted", "rejected"].includes(decision)) {
+    return errorResponse("采纳结果无效", 400);
+  }
+
+  await env.DB.prepare(
+    "UPDATE materials SET decision=?, decision_by=?, decision_at=datetime('now'), updated_at=datetime('now') WHERE id=?"
+  ).bind(decision, auth.user.id, matId).run();
+
+  const decisionLabel = decision === "accepted" ? "采纳" : "未采纳";
+  await createAuditLog(
+    env.DB,
+    auth.user.id,
+    "update_material_decision",
+    "material",
+    matId,
+    `将素材「${existing.title}」标记为${decisionLabel}`
+  );
+
+  return jsonResponse({ message: `投稿已标记为${decisionLabel}`, decision });
+}
+
 /** DELETE /api/materials/:id —— 删除素材 */
 export async function handleDeleteMaterial(request, env, matId) {
   const auth = await withAuth(request, env);
@@ -121,6 +158,11 @@ export async function handleMaterialsRoute(request, env, path) {
   }
   if (method === "POST" && path === "/api/materials") {
     return handleCreateMaterial(request, env);
+  }
+
+  const decisionMatch = path.match(/^\/api\/materials\/(\d+)\/decision$/);
+  if (decisionMatch && method === "PUT") {
+    return handleUpdateMaterialDecision(request, env, parseInt(decisionMatch[1]));
   }
 
   const idMatch = path.match(/^\/api\/materials\/(\d+)$/);

@@ -233,8 +233,9 @@ async function renderDashboard(main) {
 // ===================== 视图：素材 =====================
 async function renderMaterials(main) {
   const isMaterialCollector = currentUser.role === "MaterialCollector";
+  const canDecideMaterials = isAtLeast("MaterialCollector");
   main.innerHTML = `<h1>📁 素材</h1>
-    <p class="subtitle">${isAtLeast("DraftWriter") ? "查看所有参考资料" : isMaterialCollector ? "整理用户投稿，标记已采用供执笔委员使用" : "管理已提交的素材"}</p>
+    <p class="subtitle">${canDecideMaterials ? "整理投稿，记录内容建议是否采纳" : "查看已提交的素材"}</p>
     ${isMaterialCollector ? "<div class=\"card\" style=\"padding:12px 16px;margin-bottom:16px;background:rgba(163,58,42,0.08);border-color:rgba(163,58,42,0.3);font-size:13px;color:var(--admin-muted)\">📋 <strong>整理流程</strong>：用户投稿默认「待整理」→ 审阅后「已整理确认」→ 确认可用「标记已采用」→ 执笔委员据此写史 → 完成后「归档」</div>" : ""}
     <div class="btn-group" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="showCreateMaterialModal()">📤 上传新素材</button>
@@ -256,18 +257,20 @@ async function renderMaterials(main) {
     }
     container.innerHTML = `
       <table class="admin-table">
-        <thead><tr><th>标题</th><th>类型</th><th>提交者</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+        <thead><tr><th>标题</th><th>类型</th><th>提交者</th><th>整理状态</th><th>采纳结果</th><th>时间</th><th>操作</th></tr></thead>
         <tbody>${materials.map(m => `
           <tr>
             <td><strong>${escHtml(m.title)}</strong></td>
             <td>${typeIcon(m.material_type)}</td>
             <td>${escHtml(m.submitter_name || "")}</td>
             <td>${matStatusBadge(m.status)}</td>
+            <td>${materialDecisionBadge(m.decision)}</td>
             <td>${fmtDate(m.created_at)}</td>
             <td>
               <div class="btn-group">
                 <button class="btn btn-sm btn-primary" onclick="viewMaterial(${m.id})">查看</button>
                 ${canEditMaterial(m) ? `<button class="btn btn-sm btn-success" onclick="editMaterial(${m.id})">编辑</button>` : ""}
+                ${canDecideMaterials ? `<button class="btn btn-sm btn-success" onclick="setMaterialDecision(${m.id}, 'accepted')">采纳</button><button class="btn btn-sm btn-danger" onclick="setMaterialDecision(${m.id}, 'rejected')">未采纳</button>` : ""}
                 ${isMaterialCollector && m.status === "submitted" ? `<button class="btn btn-sm btn-warning" onclick="markMaterialOrganized(${m.id})">📋 已整理确认</button>` : ""}
                 ${isMaterialCollector && m.status === "organized" ? `<button class="btn btn-sm btn-warning" onclick="markMaterialInUse(${m.id})">✓ 标记已采用</button>` : ""}
                 ${isMaterialCollector && m.status === "in_use" ? `<button class="btn btn-sm" style="background:var(--admin-muted);color:#fff" onclick="markMaterialArchived(${m.id})">📦 归档</button>` : ""}
@@ -295,9 +298,32 @@ function canDeleteMaterial(m) {
 }
 
 function matStatusBadge(s) {
-  const map = { "submitted": ["待整理", "status-pending_review"], "organized": ["已整理", "status-pending_review"], "in_use": ["已采用", "status-approved"], "archived": ["已归档", "status-draft"] };
+  const map = { "submitted": ["待整理", "status-pending_review"], "organized": ["已整理", "status-pending_review"], "in_use": ["编纂中", "status-approved"], "archived": ["已归档", "status-draft"] };
   const [label, cls] = map[s] || [s, "status-draft"];
   return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+function materialDecisionBadge(decision) {
+  const map = {
+    pending: ["待处理", "status-pending_review"],
+    accepted: ["已采纳", "status-approved"],
+    rejected: ["未采纳", "status-rejected"],
+  };
+  const [label, cls] = map[decision] || map.pending;
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+async function setMaterialDecision(id, decision) {
+  try {
+    await api(`/materials/${id}/decision`, {
+      method: "PUT",
+      body: JSON.stringify({ decision }),
+    });
+    toast(decision === "accepted" ? "已标记为采纳" : "已标记为未采纳", "success");
+    renderMaterials(document.getElementById("mainContent"));
+  } catch (err) {
+    toast(err.message, "error");
+  }
 }
 
 async function markMaterialOrganized(id) {
@@ -355,6 +381,7 @@ async function viewMaterial(id) {
     <div class="form-group"><label>类型</label><p>${typeIcon(m.material_type)}</p></div>
     <div class="form-group"><label>内容</label><div style="white-space:pre-wrap;background:var(--admin-bg);padding:12px;border-radius:6px">${escHtml(m.content)}</div></div>
     ${m.file_url ? `<div class="form-group"><label>文件链接</label><p><a href="${escHtml(m.file_url)}" target="_blank" style="color:var(--admin-primary-hover)">${escHtml(m.file_url)}</a></p></div>` : ""}
+    <div class="form-group"><label>采纳结果</label><p>${materialDecisionBadge(m.decision)}</p></div>
     <div class="form-group"><label>提交者</label><p>${escHtml(m.submitter_name || "")} · ${fmtDate(m.created_at)}</p></div>
   `);
 }
@@ -932,7 +959,7 @@ async function renderSystemLogs(main) {
 }
 
 function actionLabel(a) {
-  const map = { "login":"登录", "create_user":"创建用户", "delete_user":"删除用户", "change_role":"修改角色",
+  const map = { "login":"登录", "create_user":"创建用户", "delete_user":"删除用户", "change_role":"修改角色", "update_material_decision":"更新投稿采纳结果",
     "create_record":"创建史事", "update_record":"更新史事", "delete_record":"删除史事",
     "submit_review":"提交审核", "approve_record":"审核通过", "reject_record":"审核驳回",
     "create_character":"创建人物", "update_character":"更新人物", "delete_character":"删除人物",

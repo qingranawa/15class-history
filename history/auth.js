@@ -4,6 +4,7 @@ window._historyInitialized = false;
 
 // API 基础路径（部署时修改为实际 Worker 地址）
 const API_BASE = "/api";
+let autoLoginPromise = null;
 
 // 令牌管理
 function getToken() {
@@ -15,6 +16,25 @@ function setToken(t) {
 function clearToken() {
   localStorage.removeItem("site_token");
   localStorage.removeItem("site_user");
+  autoLoginPromise = null;
+}
+
+function syncAccountNav(user) {
+  const accountLink = document.querySelector(".page-nav__login");
+  if (!accountLink) return;
+
+  const isAccountPage = /\/account\.html$/.test(window.location.pathname);
+  if (user) {
+    accountLink.textContent = "账户";
+    accountLink.href = "account.html";
+    if (isAccountPage) accountLink.setAttribute("aria-current", "page");
+    else accountLink.removeAttribute("aria-current");
+    return;
+  }
+
+  accountLink.textContent = "登录";
+  accountLink.href = "login.html";
+  if (isAccountPage) accountLink.removeAttribute("aria-current");
 }
 
 async function apiFetch(path, options = {}) {
@@ -157,15 +177,25 @@ async function registerViaAPI(username, password) {
 
 /** 自动登录（已存储 token） */
 async function autoLogin() {
-  const token = getToken();
-  if (!token) return null;
-  try {
-    const data = await apiFetch("/auth/me");
-    return data;
-  } catch {
-    clearToken();
-    return null;
+  if (!autoLoginPromise) {
+    autoLoginPromise = (async () => {
+      const token = getToken();
+      if (!token) {
+        syncAccountNav(null);
+        return null;
+      }
+      try {
+        const data = await apiFetch("/auth/me");
+        syncAccountNav(data);
+        return data;
+      } catch {
+        clearToken();
+        syncAccountNav(null);
+        return null;
+      }
+    })();
   }
+  return autoLoginPromise;
 }
 
 /** 静态密码回退（旧版兼容） */
@@ -204,7 +234,10 @@ window.siteAuth = {
 // ===================== 主流程 =====================
 document.addEventListener("DOMContentLoaded", () => {
   const mainContent = document.getElementById("mainContent");
-  if (!mainContent) return;
+  if (!mainContent) {
+    if (document.querySelector(".page-nav__login")) void autoLogin();
+    return;
+  }
 
   const urlParams = new URLSearchParams(window.location.search);
   const devParam = urlParams.get("dev");
@@ -243,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 已有登录态时继续自动识别，并恢复登录用户专属入口
   autoLogin().then((user) => {
     if (user) {
+      syncAccountNav(user);
       showWelcomeMessage(user.username, user.role, false);
     }
   });
