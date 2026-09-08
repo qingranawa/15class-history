@@ -33,15 +33,9 @@ export function parseCustomTags(str) {
 
 export function formatContent(content) {
     if (!content) return "";
-    let withHtml = parseCustomTags(content);
-    let formatted = withHtml
-        .replace(/\n\n/g, "</p><p>")
-        .replace(/\n/g, "<br>");
-    const blockStart = formatted.match(/^<(p|div|strong|em)/);
-    if (!blockStart) {
-        formatted = `<p>${formatted}</p>`;
-    }
-    return formatted;
+    // 统一换行格式，连续两个 <br> 才能稳定保留空一行。
+    const normalizedContent = String(content).replace(/\r\n?/g, "\n");
+    return parseCustomTags(normalizedContent).replace(/\n/g, "<br>");
 }
 
 export function sortByDate(records) {
